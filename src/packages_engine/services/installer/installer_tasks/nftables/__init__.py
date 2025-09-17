@@ -1,0 +1,4 @@
+from .nftables_ubuntu_installer_task import NftablesUbuntuInstallerTask
+from .nftables_windows_installer_task import NftablesWindowsInstallerTask
+
+__all__ = ["NftablesUbuntuInstallerTask", "NftablesWindowsInstallerTask"]
