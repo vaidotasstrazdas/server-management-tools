@@ -5,9 +5,9 @@ services:
     container_name: postgres
     restart: unless-stopped
     environment:
-      - POSTGRES_DB=gitea
-      - POSTGRES_USER=gitea
-      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB={{GITEA_DB_NAME}}
+      - POSTGRES_USER={{GITEA_DB_USER}}
+      - POSTGRES_PASSWORD={{GITEA_DB_PASSWORD}}
       - TZ=UTC
     volumes:
       - /srv/postgres/data:/var/lib/postgresql/data
@@ -28,22 +28,22 @@ services:
       - TZ=UTC
       - USER_UID=1000
       - USER_GID=1000
-      - GITEA__server__DOMAIN=gitea.internal.app
-      - GITEA__server__ROOT_URL=https://gitea.internal.app/
+      - GITEA__server__DOMAIN=gitea.{{DOMAIN_NAME}}
+      - GITEA__server__ROOT_URL=https://gitea.{{DOMAIN_NAME}}/
       - GITEA__server__PROTOCOL=http
       - GITEA__server__HTTP_ADDR=0.0.0.0
       - GITEA__server__HTTP_PORT=3000
       # Enable built-in SSH for Git-over-SSH (proxied via nginx stream)
       - GITEA__server__DISABLE_SSH=false
       - GITEA__server__START_SSH_SERVER=true
-      - GITEA__server__SSH_DOMAIN=gitea.internal.app
+      - GITEA__server__SSH_DOMAIN=gitea.{{DOMAIN_NAME}}
       - GITEA__server__SSH_PORT=2222
       # Database (PostgreSQL)
       - GITEA__database__DB_TYPE=postgres
       - GITEA__database__HOST=postgres:5432
-      - GITEA__database__NAME=gitea
-      - GITEA__database__USER=gitea
-      - GITEA__database__PASSWD=123456
+      - GITEA__database__NAME={{GITEA_DB_NAME}}
+      - GITEA__database__USER={{GITEA_DB_USER}}
+      - GITEA__database__PASSWD={{GITEA_DB_PASSWORD}}
     volumes:
       - /srv/gitea/data:/data
       - /srv/gitea/config:/etc/gitea
@@ -65,8 +65,8 @@ services:
     container_name: pgadmin
     restart: unless-stopped
     environment:
-      - PGADMIN_DEFAULT_EMAIL=strazdas.vaidotas@example.com # change
-      - PGADMIN_DEFAULT_PASSWORD=123456 # change
+      - PGADMIN_DEFAULT_EMAIL={{PG_ADMIN_EMAIL}} # change
+      - PGADMIN_DEFAULT_PASSWORD={{PG_ADMIN_PASSWORD}} # change
       - PGADMIN_CONFIG_SERVER_MODE=True
       - TZ=UTC
     volumes:
