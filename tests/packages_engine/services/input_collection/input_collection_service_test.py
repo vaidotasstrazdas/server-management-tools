@@ -294,3 +294,29 @@ class TestInputCollectionService(unittest.TestCase):
             ],
             any_order=False
         )
+    
+    @patch(f'{package_name}.input')
+    def test_read_int_default_value_is_returned_on_empty_string_when_default_value_provided(self, mock_input: MagicMock):
+        # Arrange
+        mock_input.side_effect = [
+            '',
+        ]
+
+        # Act
+        result = self.service.read_int('Title', 20)
+
+        # Assert
+        self.assertEqual(result, 20)
+    
+    @patch(f'{package_name}.input')
+    def test_read_str_default_value_is_returned_on_empty_string_when_default_value_provided(self, mock_input: MagicMock):
+        # Arrange
+        mock_input.side_effect = [
+            '',
+        ]
+
+        # Act
+        result = self.service.read_str('Title', 'my default')
+
+        # Assert
+        self.assertEqual(result, 'my default')

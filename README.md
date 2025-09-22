@@ -8,9 +8,13 @@ Also, let me make one thing clear. All of the set-ups and configurations here ar
 
 When configuring the server (i.e., using ./configure.pyz command), you will be asked to set some of the configuration values. To keep set-up faster for testing purposes, most of the configs have their default values if this makes any sense. It is not recommended to keep those defaults if you plan to use this script to set-up properly your own server.
 
+## Server Data
+
+SERVER_DATA_DIR (default: srv)
+
 ## DNS
 
-DOMAIN_NAME (default: {{DOMAIN_NAME}})
+DOMAIN_NAME (default: internal.app)
 
 ## Gitea
 
