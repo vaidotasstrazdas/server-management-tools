@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Dict
 
 from packages_engine.models import OperationResult
 
@@ -18,6 +19,7 @@ class MockFileSystemService(FileSystemServiceContract):
     def __init__(self):
         self.read_text_params: list[str] = []
         self.read_text_result = OperationResult[str].succeed('')
+        self.read_text_result_map: Dict[str, OperationResult[str]] = {}
         self.write_text_params: list[WriteTextParams] = []
         self.write_text_result = OperationResult[bool].succeed(True)
         self.make_dir_params: list[str] = []
@@ -29,6 +31,10 @@ class MockFileSystemService(FileSystemServiceContract):
 
     def read_text(self, path_location: str) -> OperationResult[str]:
         self.read_text_params.append(path_location)
+
+        if path_location in self.read_text_result_map:
+            return self.read_text_result_map[path_location]
+        
         return self.read_text_result
     
     def write_text(self, path_location: str, text: str) -> OperationResult[bool]:
