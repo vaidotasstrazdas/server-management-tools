@@ -10,25 +10,36 @@ When configuring the server (i.e., using ./configure.pyz command), you will be a
 
 ## Server Data
 
-SERVER_DATA_DIR (default: srv)
+| Configuration Key | Purpose                                                                                                                                                                                      | Default Value if Unset |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| SERVER_DATA_DIR   | Data directory where your files that come from this script will be deployed when using ./self-deploy.pyz command the first time server is installed and still needs to be accessed off-line. | srv                    |
+| REMOTE_IP_ADDRESS | Your external IP address which is going to be used to connect to your server through the WireGuard VPN. To get it, you can use services like https://whatismyipaddress.com/                  | -                      |
 
 ## DNS
 
-DOMAIN_NAME (default: internal.app)
+| Configuration Key | Purpose                                                                                                                                                                                                                                          | Default Value if Unset |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
+| DOMAIN_NAME       | Domain name that will be used when accessing internal server resources. E.g., if you server domain is internal.foo.example, then Gitea by clients that are connected to your VPN will be accessed like this: https://gitea.internal.foo.example/ | internal.app           |
 
 ## Gitea
 
-GITEA_DB_NAME (default: gitea)
-GITEA_DB_USER (default: gitea)
-GITEA_DB_PASSWORD (default: 123456)
+| Configuration Key | Purpose                                                                               | Default Value if Unset |
+| ----------------- | ------------------------------------------------------------------------------------- | ---------------------- |
+| GITEA_DB_NAME     | Database name for the PostgreSQL database that is going to be used by Gitea.          | gitea                  |
+| GITEA_DB_USER     | Database user for the PostgreSQL database that is going to be used by Gitea.          | gitea                  |
+| GITEA_DB_PASSWORD | Database user password for the PostgreSQL database that is going to be used by Gitea. | 123456                 |
 
 ## PostgreSQL
 
-PG_ADMIN_EMAIL (default: user@example.com)
-PG_ADMIN_PASSWORD (default: 123456)
+| Configuration Key | Purpose                                                        | Default Value if Unset |
+| ----------------- | -------------------------------------------------------------- | ---------------------- |
+| PG_ADMIN_EMAIL    | PostgreSQL admin email that you are going to use to log-in.    | user@example.com       |
+| PG_ADMIN_PASSWORD | PostgreSQL admin password that you are going to use to log-in. | 123456                 |
 
 ## WireGuard
 
-SERVER_KEY (no default)
-CLIENT_PUBLIC_KEY (no default)
-CLIENT_IP_ADDRESS (no default)
+| Configuration Key | Purpose                                                                                                                                                                                                                                         | Default Value if Unset |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| SERVER_KEY        | Private key of the server that is going to be replaced with actual private key. It will be generated during the execution of configuration tasks, i.e., when executing ./configure.pyz command.                                                 | -                      |
+| CLIENT_PUBLIC_KEY | Public key of the client that is going to be replaced with actual public key of the client that is connecting to the VPN. It will be generated during the execution of configuration tasks, i.e., when executing ./configure.pyz command.       | -                      |
+| CLIENT_IP_ADDRESS | IP address of the client in the VPN that is going to be replaced with actual value of the client that is connecting to the VPN. It will be generated during the execution of configuration tasks, i.e., when executing ./configure.pyz command. | -                      |
