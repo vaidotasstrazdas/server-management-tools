@@ -7,7 +7,7 @@ from packages_engine.services.configuration.configuration_data_reader import Con
 from packages_engine.services.input_collection.input_collection_service_mock import MockInputCollectionService
 from packages_engine.services.input_collection.input_collection_service_mock import ReadParams
 
-_str_values = ['s', 'ip', 'a', 'b', 'c', 'd', 'e', 'f', '', 'foo', 'bar']
+_str_values = ['s', 'ip', 'a', 'b', 'c', 'd', 'e', 'f', '', 'foo', 'bar', '/mount/usb']
 
 def _read_str_result(call_order: int, title: str, default_value: Optional[str]) -> str:
     return _str_values[call_order - 1]
@@ -45,6 +45,7 @@ class TestConfigurationDataReaderService(unittest.TestCase):
             ReadParams[str]('PostgreSQL Admin Password', '123456', 8),
             ReadParams[str]('Name of the Server Client #1', None, 10),
             ReadParams[str]('Name of the Server Client #2', None, 11),
+            ReadParams[str]('Mounted directory for the WireGuard Clients Configuration', None, 12),
         ])
         self.assertEqual(int_params, [
             ReadParams[int]('Number of Server Clients', 2, 9),
@@ -61,5 +62,5 @@ class TestConfigurationDataReaderService(unittest.TestCase):
         # Assert
         self.assertEqual(
             result,
-            ConfigurationData('s', 'ip', 'a', 'b', 'c', 'd', 'e', 'f', 2, ['foo', 'bar'])
+            ConfigurationData('s', 'ip', 'a', 'b', 'c', 'd', 'e', 'f', 2, ['foo', 'bar'], '/mount/usb')
         )

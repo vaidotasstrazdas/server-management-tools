@@ -26,5 +26,6 @@ class ConfigurationDataReaderService(ConfigurationDataReaderServiceContract):
             wireguard_client_names.append(client_name)
         
         data.wireguard_client_names = wireguard_client_names
+        data.wireguard_clients_data_dir = self.input_collection.read_str('Mounted directory for the WireGuard Clients Configuration')
     
         return data

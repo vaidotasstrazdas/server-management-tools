@@ -58,6 +58,12 @@ class TestFileSystemServiceSpecData:
         mock_path.return_value = path_instance
         return path_instance
 
+    def mock_path_exists(self, exists: bool, mock_path: MagicMock) -> Any:
+        path_instance = create_autospec(Path, instance=True)
+        path_instance.exists.return_value = exists
+        mock_path.return_value = path_instance
+        return path_instance
+
 class TestFileSystemService(unittest.TestCase):
     mockSystemManagementService: MockSystemManagementService
     service: FileSystemService
@@ -773,3 +779,31 @@ class TestFileSystemService(unittest.TestCase):
         # Assert
         params = self.mockSystemManagementService.execute_command_params
         self.assertEqual(params, [ExecuteCommandParams(["rm", "-r", "/absolute-path"])])
+
+    @patch(f'{package_name}.Path')
+    def test_path_exists_case_1(self, mock_path: MagicMock):
+        # Arrange
+        self.data.mock_path_exists(
+            exists=True,
+            mock_path=mock_path
+        )
+
+        # Act
+        result = self.service.path_exists('./content')
+
+        # Assert
+        self.assertTrue(result)
+
+    @patch(f'{package_name}.Path')
+    def test_path_exists_case_2(self, mock_path: MagicMock):
+        # Arrange
+        self.data.mock_path_exists(
+            exists=False,
+            mock_path=mock_path
+        )
+
+        # Act
+        result = self.service.path_exists('./content')
+
+        # Assert
+        self.assertFalse(result)

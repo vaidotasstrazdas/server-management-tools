@@ -8,5 +8,5 @@ from packages_engine.models import OperationResult
 
 class ConfigurationContentReaderServiceContract(ABC):
     @abstractmethod
-    def read(self, content: ConfigurationContent, config: ConfigurationData, template_path: Optional[str]) -> OperationResult[str]:
+    def read(self, content: ConfigurationContent, config: ConfigurationData, template_path: Optional[str] = None) -> OperationResult[str]:
         pass

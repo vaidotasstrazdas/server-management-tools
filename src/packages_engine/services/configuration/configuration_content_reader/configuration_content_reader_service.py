@@ -19,7 +19,7 @@ class ConfigurationContentReaderService(ConfigurationContentReaderServiceContrac
         self.wireguard_server_config_reader = wireguard_server_config_reader
         self.wireguard_shared_config_reader = wireguard_shared_config_reader
 
-    def read(self, content: ConfigurationContent, config: ConfigurationData, template_path: Optional[str]) -> OperationResult[str]:
+    def read(self, content: ConfigurationContent, config: ConfigurationData, template_path: Optional[str] = None) -> OperationResult[str]:
         if content == ConfigurationContent.RAW_STRING:
             return self.raw_reader.read(config, template_path)
         elif content == ConfigurationContent.WIREGUARD_SERVER_CONFIG:

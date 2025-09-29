@@ -78,6 +78,10 @@ class FileSystemService(FileSystemServiceContract):
         
         return OperationResult[bool].fail(f'Location {path_location} is neither file nor directory.')
 
+    def path_exists(self, path_location: str) -> bool:
+        path = self._get_path(path_location)
+        return path.exists()
+
     def _get_path(self, path_location: str) -> Path:
         return Path(path_location)
     

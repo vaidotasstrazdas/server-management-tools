@@ -22,3 +22,7 @@ class FileSystemServiceContract(ABC):
     @abstractmethod
     def remove_location(self, path_location: str) -> OperationResult[bool]:
         pass
+
+    @abstractmethod
+    def path_exists(self, path_location: str) -> bool:
+        pass

@@ -12,7 +12,8 @@ class ConfigurationData:
     pg_admin_password: str
     num_wireguard_clients: int
     wireguard_client_names: list[str]
+    wireguard_clients_data_dir: str
 
     @classmethod
     def default(cls):
-        return ConfigurationData('', '', '', '', '', '', '', '', 0, [])
+        return ConfigurationData('', '', '', '', '', '', '', '', 0, [], '')
