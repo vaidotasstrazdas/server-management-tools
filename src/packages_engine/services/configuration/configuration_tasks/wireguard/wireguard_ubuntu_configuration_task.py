@@ -8,6 +8,7 @@ from packages_engine.services.file_system import FileSystemServiceContract
 from packages_engine.services.notifications import NotificationsServiceContract
 from packages_engine.services.package_controller import PackageControllerServiceContract
 
+
 class WireguardUbuntuConfigurationTask(ConfigurationTask):
     def __init__(self, reader: ConfigurationContentReaderServiceContract,
                  file_system: FileSystemServiceContract,
@@ -20,35 +21,41 @@ class WireguardUbuntuConfigurationTask(ConfigurationTask):
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
         for client_name in data.wireguard_client_names:
-            set_client_wireguard_config_result = self._set_client_wireguard_config(client_name)
+            set_client_wireguard_config_result = self._set_client_wireguard_config(
+                client_name)
             if not set_client_wireguard_config_result.success:
                 return set_client_wireguard_config_result.as_fail()
 
-        server_config_result = self.reader.read(ConfigurationContent.WIREGUARD_SERVER_CONFIG, data)
+        server_config_result = self.reader.read(
+            ConfigurationContent.WIREGUARD_SERVER_CONFIG, data)
         if not server_config_result.success or server_config_result.data == None:
             return server_config_result.as_fail()
-        
-        write_server_config_result = self.file_system.write_text('/etc/wireguard/wg0.conf', server_config_result.data)
+
+        write_server_config_result = self.file_system.write_text(
+            '/etc/wireguard/wg0.conf', server_config_result.data)
         if not write_server_config_result.success:
             return write_server_config_result.as_fail()
-        
-        shared_config_result = self.reader.read(ConfigurationContent.WIREGUARD_CLIENTS_CONFIG, data)
+
+        shared_config_result = self.reader.read(
+            ConfigurationContent.WIREGUARD_CLIENTS_CONFIG, data)
         if not shared_config_result.success or shared_config_result.data == None:
             return shared_config_result.as_fail()
-        
-        write_shared_config_result = self.file_system.write_text(f'{data.wireguard_clients_data_dir}/wireguard_clients.config', shared_config_result.data)
+
+        write_shared_config_result = self.file_system.write_text(
+            f'{data.clients_data_dir}/wireguard_clients.config', shared_config_result.data)
         if not write_shared_config_result.success:
             return write_shared_config_result.as_fail()
-        
+
         return OperationResult[bool].succeed(True)
-    
+
     def _set_client_wireguard_config(self, client_name: str) -> OperationResult[bool]:
         client_private_key_path = f'/etc/wireguard/clients/{client_name}.key'
         client_public_key_path = f'/etc/wireguard/clients/{client_name}.pub'
         if self.file_system.path_exists(client_private_key_path) and self.file_system.path_exists(client_public_key_path):
-            self.notifications.info(f'Client "{client_name}" has WireGuard configuration already. Nothing needs to be done.')
+            self.notifications.info(
+                f'Client "{client_name}" has WireGuard configuration already. Nothing needs to be done.')
             return OperationResult[bool].succeed(True)
-        
+
         run_commands_result = self.controller.run_raw_commands([
             'umask 077',
             f'wg genkey | tee {client_private_key_path} | wg pubkey > {client_public_key_path}'

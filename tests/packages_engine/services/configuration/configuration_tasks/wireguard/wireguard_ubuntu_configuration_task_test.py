@@ -16,18 +16,21 @@ from packages_engine.services.configuration.configuration_tasks.wireguard import
 
 _server_config_read_result_successful = True
 _shared_config_read_result_successful = True
+
+
 def _read_config(content: ConfigurationContent, config: ConfigurationData, template_path: Optional[str] = None) -> OperationResult[str]:
     if content == ConfigurationContent.WIREGUARD_SERVER_CONFIG:
         if not _server_config_read_result_successful:
             return OperationResult[str].fail('wireguard-server-config-read-failure')
         return OperationResult[str].succeed('wireguard-server-config')
-    
+
     if content == ConfigurationContent.WIREGUARD_CLIENTS_CONFIG:
         if not _shared_config_read_result_successful:
             return OperationResult[str].fail('wireguard-clients-config-read-failure')
         return OperationResult[str].succeed('wireguard-clients-config')
-    
+
     return OperationResult[str].succeed('')
+
 
 class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
     reader: MockConfigurationContentReaderService
@@ -42,10 +45,11 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.file_system = MockFileSystemService()
         self.notifications = MockNotificationsService()
         self.controller = MockPackageControllerService()
-        self.task = WireguardUbuntuConfigurationTask(self.reader, self.file_system, self.notifications, self.controller)
+        self.task = WireguardUbuntuConfigurationTask(
+            self.reader, self.file_system, self.notifications, self.controller)
         self.data = ConfigurationData.default()
         self.data.wireguard_client_names = ['client_one', 'client_two']
-        self.data.wireguard_clients_data_dir = '/dev/usb/wireguard_clients'
+        self.data.clients_data_dir = '/dev/usb/wireguard_clients'
 
         self.file_system.path_exists_result_map = {
             '/etc/wireguard/clients/client_one.key': False,
@@ -64,20 +68,20 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         global _shared_config_read_result_successful
         _server_config_read_result_successful = True
         _shared_config_read_result_successful = True
-    
+
     def tearDown(self):
         global _server_config_read_result_successful
         global _shared_config_read_result_successful
         _server_config_read_result_successful = True
         _shared_config_read_result_successful = True
-    
+
     def test_happy_path(self):
         # Act
         result = self.task.configure(self.data)
 
         # Assert
         self.assertEqual(result, OperationResult[bool].succeed(True))
-    
+
     def test_checks_if_client_related_files_exist(self):
         # Arrange
         self.file_system.path_exists_result_map = {
@@ -86,7 +90,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
             '/etc/wireguard/clients/client_two.key': True,
             '/etc/wireguard/clients/client_two.pub': True
         }
-                
+
         # Act
         self.task.configure(self.data)
 
@@ -100,8 +104,8 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
                 '/etc/wireguard/clients/client_two.pub'
             ]
         )
-    
-    def test_executes_configuration_commands_when_clients_do_not_exist_case_1(self):                
+
+    def test_executes_configuration_commands_when_clients_do_not_exist_case_1(self):
         # Act
         self.task.configure(self.data)
 
@@ -119,7 +123,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
                 ]
             ]
         )
-    
+
     def test_executes_configuration_commands_when_clients_do_not_exist_case_2(self):
         # Arrange
         self.file_system.path_exists_result_map = {
@@ -142,7 +146,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
                 ]
             ]
         )
-    
+
     def test_informs_when_client_exists(self):
         # Arrange
         self.file_system.path_exists_result_map = {
@@ -159,11 +163,11 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(
             self.notifications.params,
             [
-                { 'type':'info', 'text': 'Client "client_one" has WireGuard configuration already. Nothing needs to be done.' },
-                { 'type':'info', 'text': 'Client "client_two" has WireGuard configuration already. Nothing needs to be done.' }
+                {'type': 'info', 'text': 'Client "client_one" has WireGuard configuration already. Nothing needs to be done.'},
+                {'type': 'info', 'text': 'Client "client_two" has WireGuard configuration already. Nothing needs to be done.'}
             ]
         )
-    
+
     def test_existing_clients_return_success_if_other_operations_succeed(self):
         # Arrange
         self.file_system.path_exists_result_map = {
@@ -178,7 +182,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
 
         # Assert
         self.assertEqual(result, OperationResult[bool].succeed(True))
-    
+
     def test_failure_to_configure_client_results_in_failure(self):
         # Arrange
         fail_result = OperationResult[bool].fail('Failure')
@@ -189,7 +193,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
 
         # Assert
         self.assertEqual(result, fail_result)
-    
+
     def test_reads_correct_wireguard_configurations(self):
         # Act
         self.task.configure(self.data)
@@ -198,11 +202,13 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(
             self.reader.read_params,
             [
-                ReadParams(ConfigurationContent.WIREGUARD_SERVER_CONFIG, self.data),
-                ReadParams(ConfigurationContent.WIREGUARD_CLIENTS_CONFIG, self.data)
+                ReadParams(
+                    ConfigurationContent.WIREGUARD_SERVER_CONFIG, self.data),
+                ReadParams(
+                    ConfigurationContent.WIREGUARD_CLIENTS_CONFIG, self.data)
             ]
         )
-    
+
     def test_failure_to_read_wireguard_server_configuration_results_in_failure(self):
         # Arrange
         global _server_config_read_result_successful
@@ -212,8 +218,9 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         result = self.task.configure(self.data)
 
         # Assert
-        self.assertEqual(result, OperationResult[str].fail('wireguard-server-config-read-failure'))
-    
+        self.assertEqual(result, OperationResult[str].fail(
+            'wireguard-server-config-read-failure'))
+
     def test_failure_to_read_wireguard_client_configuration_results_in_failure(self):
         # Arrange
         global _shared_config_read_result_successful
@@ -223,7 +230,8 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         result = self.task.configure(self.data)
 
         # Assert
-        self.assertEqual(result, OperationResult[str].fail('wireguard-clients-config-read-failure'))
+        self.assertEqual(result, OperationResult[str].fail(
+            'wireguard-clients-config-read-failure'))
 
     def test_failure_to_save_wireguard_server_config_results_in_failure(self):
         # Arrange
@@ -261,7 +269,9 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(
             self.file_system.write_text_params,
             [
-                WriteTextParams('/etc/wireguard/wg0.conf', 'wireguard-server-config'),
-                WriteTextParams('/dev/usb/wireguard_clients/wireguard_clients.config', 'wireguard-clients-config')
+                WriteTextParams('/etc/wireguard/wg0.conf',
+                                'wireguard-server-config'),
+                WriteTextParams(
+                    '/dev/usb/wireguard_clients/wireguard_clients.config', 'wireguard-clients-config')
             ]
         )
