@@ -47,7 +47,7 @@ class NftablesUbuntuConfigurationTask(ConfigurationTask):
         self.notifications.info('Restarting Nftables')
         run_commands_result = self.controller.run_raw_commands([
             'sudo nft -f /etc/nftables.conf',
-            'sudo systemctl restart nftables'
+            'sudo systemctl restart nftables',
             'sudo systemctl enable nftables'
         ])
         if not run_commands_result.success:

@@ -56,6 +56,10 @@ class DockerUbuntuConfigurationTask(ConfigurationTask):
         start_result = self.controller.run_raw_commands([
             'sudo chown -R 999:999 /srv/postgres/data',
             'sudo chown -R 5050:5050 /srv/pgadmin/data',
+            'sudo chmod -R 0755 /srv/postgres',
+            'sudo chmod -R 0755 /srv/gitea',
+            'sudo chmod -R 0755 /srv/pgadmin',
+            'sudo docker network create vpn-internal || true',
             'cd /srv/stack && sudo docker compose up -d'
         ])
         if not start_result.success:

@@ -11,5 +11,6 @@ class ConfigureCommand:
         config_data = self.config_data_reader.read()
         for task in self.tasks:
             configure_result = task.configure(config_data)
+            print('config result', configure_result.success)
             if not configure_result.success:
-                break
+                return

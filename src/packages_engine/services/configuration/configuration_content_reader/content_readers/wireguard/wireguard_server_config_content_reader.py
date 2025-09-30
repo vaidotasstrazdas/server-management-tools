@@ -13,11 +13,13 @@ class WireguardServerConfigContentReader(ContentReader):
 
     def read(self, config: ConfigurationData, path: Optional[str] = None) -> OperationResult[str]:
         server_key_result = self.file_system.read_text('/etc/wireguard/server.key')
+        print('server_key_result', server_key_result)
         if not server_key_result.success or server_key_result.data == None:
             return server_key_result.as_fail()
         
         server_key = server_key_result.data.strip()
         server_config_tpl_result = self.file_system.read_text(f'/usr/local/share/{config.server_data_dir}/data/wireguard/wg0.server.conf')
+        print('server_config_tpl_result', server_config_tpl_result)
         if not server_config_tpl_result.success or server_config_tpl_result.data == None:
             return server_config_tpl_result.as_fail()
         server_config_tpl = server_config_tpl_result.data
@@ -25,6 +27,7 @@ class WireguardServerConfigContentReader(ContentReader):
         server_config = server_config_tpl.replace('{{SERVER_KEY}}', server_key)
 
         client_config_tpl_result = self.file_system.read_text(f'/usr/local/share/{config.server_data_dir}/data/wireguard/wg0.client.conf')
+        print('client_config_tpl_result', client_config_tpl_result)
         if not client_config_tpl_result.success or client_config_tpl_result.data == None:
             return client_config_tpl_result.as_fail()
         client_config_tpl = client_config_tpl_result.data
@@ -32,10 +35,12 @@ class WireguardServerConfigContentReader(ContentReader):
         clients_config = ''
         for client_name in config.wireguard_client_names:
             client_endpoint_result = self.file_system.read_text(f'/etc/wireguard/clients/{client_name}.endpoint')
+            print('client_endpoint_result', client_endpoint_result)
             if not client_endpoint_result.success or client_endpoint_result.data == None:
                 return client_endpoint_result.as_fail()
             
             client_public_key_result = self.file_system.read_text(f'/etc/wireguard/clients/{client_name}.pub')
+            print('client_public_key_result', client_public_key_result)
             if not client_public_key_result.success or client_public_key_result.data == None:
                 return client_public_key_result.as_fail()
             

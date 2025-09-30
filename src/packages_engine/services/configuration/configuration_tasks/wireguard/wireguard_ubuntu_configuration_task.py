@@ -20,14 +20,20 @@ class WireguardUbuntuConfigurationTask(ConfigurationTask):
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        index = 2
         for client_name in data.wireguard_client_names:
+            endpoint = f'10.10.0.{index}'
+            index = index + 1
             set_client_wireguard_config_result = self._set_client_wireguard_config(
-                client_name)
+                client_name,
+                endpoint
+            )
             if not set_client_wireguard_config_result.success:
                 return set_client_wireguard_config_result.as_fail()
 
         server_config_result = self.reader.read(
-            ConfigurationContent.WIREGUARD_SERVER_CONFIG, data)
+            ConfigurationContent.WIREGUARD_SERVER_CONFIG, data
+        )
         if not server_config_result.success or server_config_result.data == None:
             return server_config_result.as_fail()
 
@@ -45,21 +51,36 @@ class WireguardUbuntuConfigurationTask(ConfigurationTask):
             f'{data.clients_data_dir}/wireguard_clients.config', shared_config_result.data)
         if not write_shared_config_result.success:
             return write_shared_config_result.as_fail()
+        
+        run_result = self.controller.run_raw_commands([
+            'sudo ufw allow 51820/udp',
+            'sudo systemctl enable wg-quick@wg0',
+            'sudo systemctl start wg-quick@wg0',
+            'sudo wg'
+        ])
+        if not run_result.success:
+            return run_result.as_fail()
 
         return OperationResult[bool].succeed(True)
 
-    def _set_client_wireguard_config(self, client_name: str) -> OperationResult[bool]:
+    def _set_client_wireguard_config(self, client_name: str, endpoint: str) -> OperationResult[bool]:
         client_private_key_path = f'/etc/wireguard/clients/{client_name}.key'
         client_public_key_path = f'/etc/wireguard/clients/{client_name}.pub'
-        if self.file_system.path_exists(client_private_key_path) and self.file_system.path_exists(client_public_key_path):
+        client_endpoint_path = f'/etc/wireguard/clients/{client_name}.endpoint'
+        if self.file_system.path_exists(client_private_key_path) and self.file_system.path_exists(client_public_key_path) and self.file_system.path_exists(client_endpoint_path):
             self.notifications.info(
-                f'Client "{client_name}" has WireGuard configuration already. Nothing needs to be done.')
+                f'Client "{client_name}" has WireGuard configuration already. Nothing needs to be done.'
+            )
             return OperationResult[bool].succeed(True)
 
         run_commands_result = self.controller.run_raw_commands([
             'umask 077',
             f'wg genkey | tee {client_private_key_path} | wg pubkey > {client_public_key_path}'
         ])
+
+        write_result = self.file_system.write_text(client_endpoint_path, endpoint)
+        if not write_result.success:
+            return write_result.as_fail()
 
         if not run_commands_result.success:
             return run_commands_result.as_fail()

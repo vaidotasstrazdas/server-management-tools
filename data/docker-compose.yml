@@ -1,7 +1,7 @@
 name: internal-stack
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:17.6
     container_name: postgres
     restart: unless-stopped
     environment:
@@ -21,7 +21,7 @@ services:
     networks: [vpn-internal]
 
   gitea:
-    image: gitea/gitea:latest
+    image: gitea/gitea:1.24-rootless
     container_name: gitea
     restart: unless-stopped
     environment:
@@ -61,7 +61,7 @@ services:
     networks: [vpn-internal]
 
   pgadmin:
-    image: dpage/pgadmin4:8.10
+    image: dpage/pgadmin4:9.8.0
     container_name: pgadmin
     restart: unless-stopped
     environment:

@@ -95,7 +95,7 @@ class FileSystemService(FileSystemServiceContract):
                 return remove_result.as_fail()
 
         execute_raw_command_result = self.systemManagementService.execute_raw_command(
-            f'sudo cp -a {location_from} {location_to}'
+            f'sudo mkdir -p {location_to} && sudo cp -a {location_from} {location_to}'
         )
 
         if not execute_raw_command_result.success:
