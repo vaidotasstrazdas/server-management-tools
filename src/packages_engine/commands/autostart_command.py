@@ -1,8 +1,7 @@
 from packages_engine.services.package_controller import PackageControllerServiceContract
 
-class AutostartCommand:
-    controller: PackageControllerServiceContract
 
+class AutostartCommand:
     def __init__(self, controller: PackageControllerServiceContract):
         self.controller = controller
 
@@ -22,7 +21,8 @@ class AutostartCommand:
         self.controller.run_command(["systemctl", "enable", "nftables"])
 
         # docker
-        self.controller.run_command(["docker", "compose", "up", "-d"], "/srv/stack")
+        self.controller.run_command(
+            ["docker", "compose", "up", "-d"], "/srv/stack")
 
         # nginx
         self.controller.ensure_running("nginx")

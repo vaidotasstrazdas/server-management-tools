@@ -1,28 +1,15 @@
-from packages_engine.services.package_controller import PackageControllerServiceContract
+from packages_engine.services.configuration import ConfigurationDataReaderServiceContract
+from packages_engine.services.configuration.configuration_tasks import ConfigurationTask
+
 
 class ConfigureCommand:
-    controller: PackageControllerServiceContract
-
-    def __init__(self, controller: PackageControllerServiceContract):
-        self.controller = controller
+    def __init__(self, config_data_reader: ConfigurationDataReaderServiceContract, tasks: list[ConfigurationTask]):
+        self.config_data_reader = config_data_reader
+        self.tasks = tasks
 
     def execute(self):
-        # WireGuard
-        self.controller.run_command(["systemctl", "enable", "wg-quick@wg0"])
-        self.controller.run_command(["systemctl", "start", "wg-quick@wg0"])
-        self.controller.run_command(["ufw", "allow", "51820/udp"])
-
-        # dnsmasq
-        self.controller.run_command(["systemctl", "start", "dnsmasq"])
-        self.controller.run_command(["systemctl", "restart", "dnsmasq"])
-        self.controller.run_command(["systemctl", "enable", "dnsmasq"])
-
-        # nftables
-        self.controller.run_command(["nft", "-f", "/etc/nftables.conf"])
-        self.controller.run_command(["systemctl", "enable", "nftables"])
-
-        # docker
-        self.controller.run_command(["docker", "compose", "up", "-d"], "/srv/stack")
-
-        # nginx
-        self.controller.ensure_running("nginx")
+        config_data = self.config_data_reader.read()
+        for task in self.tasks:
+            configure_result = task.configure(config_data)
+            if not configure_result.success:
+                break

@@ -22,6 +22,8 @@ from packages_engine.services.package_controller import PackageControllerService
 from packages_engine.services.system_management import SystemManagementService
 from packages_engine.services.notifications import NotificationsService
 from packages_engine.services.system_management_engine_locator import SystemManagementEngineLocatorService
+from packages_engine.commands import ConfigureCommand
+
 
 def main():
     systemManagementEngineLocatorService = SystemManagementEngineLocatorService()
@@ -34,46 +36,54 @@ def main():
     config_reader = ConfigurationDataReaderService(input_collection)
 
     file_system = FileSystemService(systemManagementService)
-    wireguard_server_config_reader = WireguardServerConfigContentReader(file_system)
-    wireguard_shared_config_reader = WireguardSharedConfigContentReader(file_system)
+    wireguard_server_config_reader = WireguardServerConfigContentReader(
+        file_system)
+    wireguard_shared_config_reader = WireguardSharedConfigContentReader(
+        file_system)
     raw_string_reader = RawStringContentReader(file_system)
-    content_reader = ConfigurationContentReaderService(file_system, raw_string_reader, wireguard_server_config_reader, wireguard_shared_config_reader)
-    controller = PackageControllerService(systemManagementService, notifications_service)
+    content_reader = ConfigurationContentReaderService(
+        file_system, raw_string_reader, wireguard_server_config_reader, wireguard_shared_config_reader)
+    controller = PackageControllerService(
+        systemManagementService, notifications_service)
 
     wireguard = GenericConfigurationTask(
-        WireguardUbuntuConfigurationTask(content_reader, file_system, notifications_service, controller),
+        WireguardUbuntuConfigurationTask(
+            content_reader, file_system, notifications_service, controller),
         WireguardWindowsConfigurationTask()
     )
 
     dnsmasq = GenericConfigurationTask(
-        DnsmasqUbuntuConfigurationTask(content_reader, file_system, notifications_service, controller),
+        DnsmasqUbuntuConfigurationTask(
+            content_reader, file_system, notifications_service, controller),
         DnsmasqWindowsConfigurationTask()
     )
 
     nftables = GenericConfigurationTask(
-        NftablesUbuntuConfigurationTask(content_reader, file_system, notifications_service, controller),
+        NftablesUbuntuConfigurationTask(
+            content_reader, file_system, notifications_service, controller),
         NftablesWindowsConfigurationTask()
     )
 
     docker = GenericConfigurationTask(
-        DockerUbuntuConfigurationTask(content_reader, file_system, notifications_service, controller),
+        DockerUbuntuConfigurationTask(
+            content_reader, file_system, notifications_service, controller),
         DockerWindowsConfigurationTask()
     )
 
     nginx = GenericConfigurationTask(
-        NginxUbuntuConfigurationTask(content_reader, file_system, notifications_service, controller),
+        NginxUbuntuConfigurationTask(
+            content_reader, file_system, notifications_service, controller),
         NginxWindowsConfigurationTask()
     )
 
     autostart = GenericConfigurationTask(
-        AutostartUbuntuConfigurationTask(content_reader, file_system, notifications_service, controller),
+        AutostartUbuntuConfigurationTask(
+            content_reader, file_system, notifications_service, controller),
         AutostartWindowsConfigurationTask()
     )
 
-    config_data = config_reader.read()
-    wireguard.configure(config_data)
-    dnsmasq.configure(config_data)
-    nftables.configure(config_data)
-    docker.configure(config_data)
-    nginx.configure(config_data)
-    autostart.configure(config_data)
+    command = ConfigureCommand(
+        config_reader,
+        [wireguard, dnsmasq, nftables, docker, nginx, autostart]
+    )
+    command.execute()

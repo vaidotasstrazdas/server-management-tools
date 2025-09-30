@@ -11,6 +11,7 @@ from packages_engine.services.file_system import FileSystemService
 
 package_name = 'packages_engine.services.file_system.file_system_service'
 
+
 class TestFileSystemServiceSpecData:
     def mock_read_text(self, exists: bool, is_file: bool, result: str, mock_path: MagicMock) -> Any:
         path_instance = create_autospec(Path, instance=True)
@@ -64,6 +65,7 @@ class TestFileSystemServiceSpecData:
         mock_path.return_value = path_instance
         return path_instance
 
+
 class TestFileSystemService(unittest.TestCase):
     mockSystemManagementService: MockSystemManagementService
     service: FileSystemService
@@ -73,7 +75,7 @@ class TestFileSystemService(unittest.TestCase):
         self.mockSystemManagementService = MockSystemManagementService()
         self.service = FileSystemService(self.mockSystemManagementService)
         self.data = TestFileSystemServiceSpecData()
-    
+
     @patch(f'{package_name}.Path')
     def test_read_text_happy_path(self, mock_path: MagicMock):
         # Arrange
@@ -129,7 +131,8 @@ class TestFileSystemService(unittest.TestCase):
         result = self.service.read_text('file.txt')
 
         # Assert
-        self.assertEqual(result, OperationResult[str].fail('Path file.txt does not exist'))
+        self.assertEqual(result, OperationResult[str].fail(
+            'Path file.txt does not exist'))
 
     @patch(f'{package_name}.Path')
     def test_read_text_fails_when_location_is_not_file(self, mock_path: MagicMock):
@@ -145,7 +148,8 @@ class TestFileSystemService(unittest.TestCase):
         result = self.service.read_text('file.txt')
 
         # Assert
-        self.assertEqual(result, OperationResult[str].fail('Path file.txt is not a file'))
+        self.assertEqual(result, OperationResult[str].fail(
+            'Path file.txt is not a file'))
 
     @patch(f'{package_name}.Path')
     def test_write_text_happy_path(self, mock_path: MagicMock):
@@ -200,8 +204,9 @@ class TestFileSystemService(unittest.TestCase):
         result = self.service.write_text('file.txt', 'content')
 
         # Assert
-        self.assertEqual(result, OperationResult[str].fail('Path file.txt is not a file'))
-    
+        self.assertEqual(result, OperationResult[str].fail(
+            'Path file.txt is not a file'))
+
     @patch(f'{package_name}.Path')
     def test_write_text_creates_file_if_it_does_not_exist(self, mock_path: MagicMock):
         # Arrange
@@ -216,7 +221,8 @@ class TestFileSystemService(unittest.TestCase):
 
         # Assert
         params = self.mockSystemManagementService.execute_command_params
-        self.assertEqual(params, [ExecuteCommandParams(["touch", '/absolute-path.txt'])])
+        self.assertEqual(params, [ExecuteCommandParams(
+            ["touch", '/absolute-path.txt'])])
 
     @patch(f'{package_name}.Path')
     def test_write_text_does_not_create_file_if_it_exists(self, mock_path: MagicMock):
@@ -237,7 +243,8 @@ class TestFileSystemService(unittest.TestCase):
     @patch(f'{package_name}.Path')
     def test_write_text_returns_success_when_not_existing_file_is_created_successfully(self, mock_path: MagicMock):
         # Arrange
-        self.mockSystemManagementService.execute_command_result = OperationResult[bool].succeed(True)
+        self.mockSystemManagementService.execute_command_result = OperationResult[bool].succeed(
+            True)
         self.data.mock_write_text(
             exists=False,
             is_file=True,
@@ -253,7 +260,8 @@ class TestFileSystemService(unittest.TestCase):
     @patch(f'{package_name}.Path')
     def test_write_text_returns_failure_when_not_existing_filecreation_command_fails(self, mock_path: MagicMock):
         # Arrange
-        self.mockSystemManagementService.execute_command_result = OperationResult[bool].fail('failure')
+        self.mockSystemManagementService.execute_command_result = OperationResult[bool].fail(
+            'failure')
         self.data.mock_write_text(
             exists=False,
             is_file=True,
@@ -359,7 +367,8 @@ class TestFileSystemService(unittest.TestCase):
 
         # Assert
         params = self.mockSystemManagementService.execute_command_params
-        self.assertEqual(params, [ExecuteCommandParams(["mkdir", "-p", "/absolute-path"])])
+        self.assertEqual(params, [ExecuteCommandParams(
+            ["mkdir", "-p", "/absolute-path"])])
 
     @patch(f'{package_name}.Path')
     def test_make_dir_does_not_execute_command_when_dir_exists(self, mock_path: MagicMock):
@@ -392,7 +401,8 @@ class TestFileSystemService(unittest.TestCase):
         result = self.service.make_dir('./content')
 
         # Assert
-        self.assertEqual(result, OperationResult[bool].fail('Path ./content is file, so can not make the directory out of it.'))
+        self.assertEqual(result, OperationResult[bool].fail(
+            'Path ./content is file, so can not make the directory out of it.'))
 
     @patch(f'{package_name}.Path')
     def test_make_dir_returns_fail_when_existing_path_is_not_directory(self, mock_path: MagicMock):
@@ -408,12 +418,14 @@ class TestFileSystemService(unittest.TestCase):
         result = self.service.make_dir('./content')
 
         # Assert
-        self.assertEqual(result, OperationResult[bool].fail('Path ./content is not a file and not a directory.'))
+        self.assertEqual(result, OperationResult[bool].fail(
+            'Path ./content is not a file and not a directory.'))
 
     @patch(f'{package_name}.Path')
     def test_make_dir_returns_fail_when_creation_command_fails(self, mock_path: MagicMock):
         # Arrange
-        self.mockSystemManagementService.execute_command_result = OperationResult[bool].fail('failure')
+        self.mockSystemManagementService.execute_command_result = OperationResult[bool].fail(
+            'failure')
         self.data.mock_make_dir(
             exists=False,
             is_file=False,
@@ -474,7 +486,8 @@ class TestFileSystemService(unittest.TestCase):
 
         # Assert
         params = self.mockSystemManagementService.execute_command_params
-        self.assertEqual(params, [ExecuteCommandParams(["chmod", "777", "/absolute-path"])])
+        self.assertEqual(params, [ExecuteCommandParams(
+            ["chmod", "777", "/absolute-path"])])
 
     @patch(f'{package_name}.Path')
     def test_chmod_does_not_execute_command_on_not_existing_path(self, mock_path: MagicMock):
@@ -503,7 +516,8 @@ class TestFileSystemService(unittest.TestCase):
         result = self.service.chmod('./content', 777)
 
         # Assert
-        self.assertEqual(result, OperationResult[bool].fail(f'Path ./content does not exist.'))
+        self.assertEqual(result, OperationResult[bool].fail(
+            f'Path ./content does not exist.'))
 
     @patch(f'{package_name}.Path')
     def test_chmod_returns_success_when_command_succeeds(self, mock_path: MagicMock):
@@ -672,7 +686,8 @@ class TestFileSystemService(unittest.TestCase):
         result = self.service.remove_location('./content')
 
         # Assert
-        self.assertEqual(result, OperationResult[bool].fail(f'Location ./content is neither file nor directory.'))
+        self.assertEqual(result, OperationResult[bool].fail(
+            f'Location ./content is neither file nor directory.'))
 
     @patch(f'{package_name}.Path')
     def test_chmod_remove_location_file_succeeds_when_command_succeeds(self, mock_path: MagicMock):
@@ -725,7 +740,8 @@ class TestFileSystemService(unittest.TestCase):
 
         # Assert
         params = self.mockSystemManagementService.execute_command_params
-        self.assertEqual(params, [ExecuteCommandParams(["rm", "/absolute-path"])])
+        self.assertEqual(
+            params, [ExecuteCommandParams(["rm", "/absolute-path"])])
 
     @patch(f'{package_name}.Path')
     def test_chmod_remove_location_folder_succeeds_when_command_succeeds(self, mock_path: MagicMock):
@@ -778,7 +794,8 @@ class TestFileSystemService(unittest.TestCase):
 
         # Assert
         params = self.mockSystemManagementService.execute_command_params
-        self.assertEqual(params, [ExecuteCommandParams(["rm", "-r", "/absolute-path"])])
+        self.assertEqual(
+            params, [ExecuteCommandParams(["rm", "-r", "/absolute-path"])])
 
     @patch(f'{package_name}.Path')
     def test_path_exists_case_1(self, mock_path: MagicMock):
@@ -807,3 +824,202 @@ class TestFileSystemService(unittest.TestCase):
 
         # Assert
         self.assertFalse(result)
+
+    @patch(f'{package_name}.Path.exists')
+    def test_copy_path_happy_path(self, mock_path: MagicMock):
+        # Arrange
+        mock_path.side_effect = [
+            True,
+            False
+        ]
+
+        # Act
+        result = self.service.copy_path('from', 'to')
+
+        # Assert
+        self.assertEqual(result, OperationResult[bool].succeed(True))
+
+    @patch(f'{package_name}.Path.exists')
+    def test_copy_path_results_in_error_when_starting_location_does_not_exist(self, mock_path: MagicMock):
+        # Arrange
+        mock_path.side_effect = [
+            False,
+            False
+        ]
+
+        # Act
+        result = self.service.copy_path('from', 'to')
+
+        # Assert
+        self.assertEqual(
+            result,
+            OperationResult[bool].fail(
+                'Path "from" does not exist'
+            )
+        )
+
+    @patch(f'{package_name}.Path.exists')
+    def test_copy_path_does_not_remove_location_copied_to_when_it_does_not_exist(self, mock_path: MagicMock):
+        # Arrange
+        mock_path.side_effect = [
+            False,
+            False
+        ]
+
+        # Act
+        self.service.copy_path('from', 'to')
+
+        # Assert
+        self.assertEqual(
+            self.mockSystemManagementService.execute_command_params,
+            []
+        )
+
+    @patch(f'{package_name}.Path.as_posix')
+    @patch(f'{package_name}.Path.exists')
+    @patch(f'{package_name}.Path.is_file')
+    @patch(f'{package_name}.Path.is_dir')
+    def test_copy_path_removes_location_copied_to_when_it_exists_as_file(self, mock_is_dir: MagicMock, mock_is_file: MagicMock, mock_exists: MagicMock, mock_as_posix: MagicMock):
+        # Arrange
+        mock_is_dir.side_effect = [
+            False
+        ]
+        mock_is_file.side_effect = [
+            True
+        ]
+        mock_exists.side_effect = [
+            True,
+            True,
+            True
+        ]
+        mock_as_posix.side_effect = [
+            '/path-location/to'
+        ]
+
+        # Act
+        self.service.copy_path('from', 'to')
+
+        # Assert
+        self.assertEqual(
+            self.mockSystemManagementService.execute_command_params,
+            [ExecuteCommandParams(['rm', '/path-location/to'])]
+        )
+
+    @patch(f'{package_name}.Path.as_posix')
+    @patch(f'{package_name}.Path.exists')
+    @patch(f'{package_name}.Path.is_file')
+    @patch(f'{package_name}.Path.is_dir')
+    def test_copy_path_removes_location_copied_to_when_it_exists_as_folder(self, mock_is_dir: MagicMock, mock_is_file: MagicMock, mock_exists: MagicMock, mock_as_posix: MagicMock):
+        # Arrange
+        mock_is_dir.side_effect = [
+            True
+        ]
+        mock_is_file.side_effect = [
+            False
+        ]
+        mock_exists.side_effect = [
+            True,
+            True,
+            True
+        ]
+        mock_as_posix.side_effect = [
+            '/path-location/to'
+        ]
+
+        # Act
+        self.service.copy_path('from', 'to')
+
+        # Assert
+        self.assertEqual(
+            self.mockSystemManagementService.execute_command_params,
+            [ExecuteCommandParams(['rm', '-r', '/path-location/to'])]
+        )
+
+    @patch(f'{package_name}.Path.as_posix')
+    @patch(f'{package_name}.Path.exists')
+    @patch(f'{package_name}.Path.is_file')
+    @patch(f'{package_name}.Path.is_dir')
+    def test_copy_path_with_location_removal_happy_path(self, mock_is_dir: MagicMock, mock_is_file: MagicMock, mock_exists: MagicMock, mock_as_posix: MagicMock):
+        # Arrange
+        mock_is_dir.side_effect = [
+            True
+        ]
+        mock_is_file.side_effect = [
+            False
+        ]
+        mock_exists.side_effect = [
+            True,
+            True,
+            True
+        ]
+        mock_as_posix.side_effect = [
+            '/path-location/to'
+        ]
+
+        # Act
+        result = self.service.copy_path('from', 'to')
+
+        # Assert
+        self.assertEqual(result, OperationResult[bool].succeed(True))
+
+    @patch(f'{package_name}.Path.as_posix')
+    @patch(f'{package_name}.Path.exists')
+    @patch(f'{package_name}.Path.is_file')
+    @patch(f'{package_name}.Path.is_dir')
+    def test_copy_path_remove_location_failure_results_in_copy_path_failure(self, mock_is_dir: MagicMock, mock_is_file: MagicMock, mock_exists: MagicMock, mock_as_posix: MagicMock):
+        # Arrange
+        fail_result = OperationResult[bool].fail('Failure')
+        self.mockSystemManagementService.execute_command_result = fail_result
+        mock_is_dir.side_effect = [
+            True
+        ]
+        mock_is_file.side_effect = [
+            False
+        ]
+        mock_exists.side_effect = [
+            True,
+            True,
+            True
+        ]
+        mock_as_posix.side_effect = [
+            '/path-location/to'
+        ]
+
+        # Act
+        result = self.service.copy_path('from', 'to')
+
+        # Assert
+        self.assertEqual(result, fail_result)
+
+    @patch(f'{package_name}.Path.exists')
+    def test_copy_path_executes_correct_command(self, mock_path: MagicMock):
+        # Arrange
+        mock_path.side_effect = [
+            True,
+            False
+        ]
+
+        # Act
+        self.service.copy_path('from', 'to')
+
+        # Assert
+        self.assertEqual(
+            self.mockSystemManagementService.execute_raw_command_params,
+            ['sudo cp -a from to']
+        )
+
+    @patch(f'{package_name}.Path.exists')
+    def test_copy_path_coppy_command_failure_results_in_copy_path_failure(self, mock_path: MagicMock):
+        # Arrange
+        fail_result = OperationResult[bool].fail('Failure')
+        self.mockSystemManagementService.execute_raw_command_result = fail_result
+        mock_path.side_effect = [
+            True,
+            False
+        ]
+
+        # Act
+        result = self.service.copy_path('from', 'to')
+
+        # Assert
+        self.assertEqual(result, fail_result)

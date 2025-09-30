@@ -1,15 +1,12 @@
-from packages_engine.services.package_controller import PackageControllerServiceContract
+from packages_engine.services.installer import InstallerServiceContract
+from packages_engine.services.installer.installer_tasks import InstallerTask
+
 
 class InstallCommand:
-    controller: PackageControllerServiceContract
-
-    def __init__(self, controller: PackageControllerServiceContract):
-        self.controller = controller
+    def __init__(self, installer: InstallerServiceContract,
+                 install_tasks: list[InstallerTask]):
+        self.installer = installer
+        self.install_tasks = install_tasks
 
     def execute(self):
-        self.controller.install_package("wireguard")
-        self.controller.install_package("dnsmasq")
-        self.controller.install_package("nftables")
-        self.controller.install_package("ca-certificates")
-        self.controller.install_package("curl")
-        self.controller.install_package("gnupg")
+        self.installer.install(self.install_tasks)

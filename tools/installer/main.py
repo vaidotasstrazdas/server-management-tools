@@ -14,6 +14,8 @@ from packages_engine.services.package_controller import PackageControllerService
 from packages_engine.services.system_management import SystemManagementService
 from packages_engine.services.notifications import NotificationsService
 from packages_engine.services.system_management_engine_locator import SystemManagementEngineLocatorService
+from packages_engine.commands import InstallCommand
+
 
 def main():
     systemManagementEngineLocatorService = SystemManagementEngineLocatorService()
@@ -22,7 +24,8 @@ def main():
 
     notificationsService = NotificationsService()
 
-    controller = PackageControllerService(systemManagementService, notificationsService)
+    controller = PackageControllerService(
+        systemManagementService, notificationsService)
     installerService = InstallerService()
 
     wireguard = GenericInstallerTask(
@@ -49,5 +52,9 @@ def main():
         NginxUbuntuInstallerTask(notificationsService, engine, controller),
         NginxWindowsInstallerTask()
     )
-    
-    installerService.install([wireguard, dnsmasq, nftables, docker, nginx])
+
+    command = InstallCommand(
+        installerService,
+        [wireguard, dnsmasq, nftables, docker, nginx]
+    )
+    command.execute()

@@ -18,6 +18,12 @@ class ChmodParams:
     chmod: int
 
 
+@dataclass
+class CopyPathParams:
+    location_from: str
+    location_to: str
+
+
 class MockFileSystemService(FileSystemServiceContract):
     def __init__(self):
         self.read_text_params: list[str] = []
@@ -36,6 +42,9 @@ class MockFileSystemService(FileSystemServiceContract):
         self.path_exists_params: list[str] = []
         self.path_exists_result = True
         self.path_exists_result_map: Dict[str, bool] = {}
+        self.copy_path_params: list[CopyPathParams] = []
+        self.copy_path_result = OperationResult[bool].succeed(True)
+        self.copy_path_result_map: Dict[str, OperationResult[bool]] = {}
 
     def read_text(self, path_location: str) -> OperationResult[str]:
         self.read_text_params.append(path_location)
@@ -76,3 +85,13 @@ class MockFileSystemService(FileSystemServiceContract):
             return self.path_exists_result_map[path_location]
 
         return self.path_exists_result
+
+    def copy_path(self, location_from: str, location_to: str) -> OperationResult[bool]:
+        self.copy_path_params.append(
+            CopyPathParams(location_from, location_to))
+
+        copy_sequence = f'{location_from}->{location_to}'
+        if copy_sequence in self.copy_path_result_map:
+            return self.copy_path_result_map[copy_sequence]
+
+        return self.copy_path_result

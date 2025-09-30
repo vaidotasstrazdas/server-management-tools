@@ -1,8 +1,9 @@
-from packages_engine.commands import AutostartCommand
-from packages_engine.services.package_controller import PackageControllerService
+from packages_engine.services.file_system import FileSystemService
+from packages_engine.services.input_collection import InputCollectionService
 from packages_engine.services.system_management import SystemManagementService
 from packages_engine.services.notifications import NotificationsService
 from packages_engine.services.system_management_engine_locator import SystemManagementEngineLocatorService
+from packages_engine.commands import SelfDeployCommand
 
 
 def main():
@@ -10,11 +11,14 @@ def main():
     engine = systemManagementEngineLocatorService.locate_engine()
     systemManagementService = SystemManagementService(engine)
 
-    notificationsService = NotificationsService()
+    notifications_service = NotificationsService()
 
-    controller = PackageControllerService(
-        systemManagementService, notificationsService)
+    input_collection = InputCollectionService()
+    file_system = FileSystemService(systemManagementService)
 
-    command = AutostartCommand(controller)
-
+    command = SelfDeployCommand(
+        file_system,
+        input_collection,
+        notifications_service
+    )
     command.execute()

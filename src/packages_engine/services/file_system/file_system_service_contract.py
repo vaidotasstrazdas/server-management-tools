@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from packages_engine.models import OperationResult
 
+
 class FileSystemServiceContract(ABC):
     @abstractmethod
     def read_text(self, path_location: str) -> OperationResult[str]:
@@ -25,4 +26,8 @@ class FileSystemServiceContract(ABC):
 
     @abstractmethod
     def path_exists(self, path_location: str) -> bool:
+        pass
+
+    @abstractmethod
+    def copy_path(self, location_from: str, location_to: str) -> OperationResult[bool]:
         pass
