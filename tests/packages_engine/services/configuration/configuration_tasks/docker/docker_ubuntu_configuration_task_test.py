@@ -22,7 +22,6 @@ class TestDockerUbuntuConfigurationTask(unittest.TestCase):
     data: ConfigurationData
 
     def setUp(self):
-        self.maxDiff = None
         self.reader = MockConfigurationContentReaderService()
         self.file_system = MockFileSystemService()
         self.notifications = MockNotificationsService()

@@ -5,15 +5,18 @@ from packages_engine.models import OperationResult
 
 from .file_system_service_contract import FileSystemServiceContract
 
+
 @dataclass
 class WriteTextParams:
     path_location: str
     text: str
 
+
 @dataclass
 class ChmodParams:
     path_location: str
     chmod: int
+
 
 class MockFileSystemService(FileSystemServiceContract):
     def __init__(self):
@@ -29,6 +32,7 @@ class MockFileSystemService(FileSystemServiceContract):
         self.chmod_result = OperationResult[bool].succeed(True)
         self.remove_location_params: list[str] = []
         self.remove_location_result = OperationResult[bool].succeed(True)
+        self.remove_location_result_map: Dict[str, OperationResult[bool]] = {}
         self.path_exists_params: list[str] = []
         self.path_exists_result = True
         self.path_exists_result_map: Dict[str, bool] = {}
@@ -38,15 +42,15 @@ class MockFileSystemService(FileSystemServiceContract):
 
         if path_location in self.read_text_result_map:
             return self.read_text_result_map[path_location]
-        
+
         return self.read_text_result
-    
+
     def write_text(self, path_location: str, text: str) -> OperationResult[bool]:
         self.write_text_params.append(WriteTextParams(path_location, text))
 
         if path_location in self.write_text_result_map:
             return self.write_text_result_map[path_location]
-        
+
         return self.write_text_result
 
     def make_dir(self, path_location: str) -> OperationResult[bool]:
@@ -59,6 +63,10 @@ class MockFileSystemService(FileSystemServiceContract):
 
     def remove_location(self, path_location: str) -> OperationResult[bool]:
         self.remove_location_params.append(path_location)
+
+        if path_location in self.remove_location_result_map:
+            return self.remove_location_result_map[path_location]
+
         return self.remove_location_result
 
     def path_exists(self, path_location: str) -> bool:
@@ -66,5 +74,5 @@ class MockFileSystemService(FileSystemServiceContract):
 
         if path_location in self.path_exists_result_map:
             return self.path_exists_result_map[path_location]
-        
+
         return self.path_exists_result

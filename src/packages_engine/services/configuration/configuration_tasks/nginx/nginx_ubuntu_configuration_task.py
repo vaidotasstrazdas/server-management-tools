@@ -20,8 +20,21 @@ class NginxUbuntuConfigurationTask(ConfigurationTask):
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
-        self.notifications.info('Creating PKI folder if needed.')
-        if self.file_system.path_exists('/etc/ssl/internal-pki'):
+        self.notifications.info('Creating PKI if needed.')
+        process_result = self._process_paths([
+            '/etc/ssl/internal-pki',
+            '/etc/ssl/internal-pki/san.cnf',
+            f'/etc/ssl/internal-pki/{data.domain_name}.key',
+            f'/etc/ssl/internal-pki/{data.domain_name}.csr',
+            f'/etc/ssl/internal-pki/{data.domain_name}.crt',
+            '/etc/ssl/certs/internal.crt',
+            '/etc/ssl/private/internal.key'
+        ])
+
+        if not process_result.success or process_result.data == None:
+            return process_result.as_fail()
+
+        if process_result.data == True:
             self.notifications.success(
                 '\tPKI configured already. Nothing needs to be done.')
             return OperationResult[bool].succeed(True)
@@ -96,3 +109,29 @@ class NginxUbuntuConfigurationTask(ConfigurationTask):
             '\tSaving certificate authority configuration file on the external device succeeded.')
 
         return OperationResult[bool].succeed(True)
+
+    def _process_paths(self, paths: list[str]) -> OperationResult[bool]:
+        config_created = True
+        self.notifications.info('Checking if PKI is configured')
+        for path in paths:
+            if not self.file_system.path_exists(path):
+                config_created = False
+                break
+
+        if not config_created:
+            self.notifications.info(
+                '\tPKI is not configured. Will remove unnecessary files')
+            for path in paths:
+                if self.file_system.path_exists(path):
+                    self.notifications.info(f'\tRemoving "{path}"')
+                    remove_result = self.file_system.remove_location(path)
+                    if not remove_result.success:
+                        self.notifications.error(
+                            f'\t\tRemoving "{path}" failed')
+                        return remove_result.as_fail()
+                    self.notifications.success(
+                        f'\t\tRemoving "{path}" successful')
+        else:
+            self.notifications.info('\tPKI is configured')
+
+        return OperationResult[bool].succeed(config_created)
