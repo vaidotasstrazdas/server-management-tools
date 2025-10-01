@@ -54,8 +54,10 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.file_system.path_exists_result_map = {
             '/etc/wireguard/clients/client_one.key': False,
             '/etc/wireguard/clients/client_one.pub': False,
+            '/etc/wireguard/clients/client_one.endpoint': False,
             '/etc/wireguard/clients/client_two.key': False,
-            '/etc/wireguard/clients/client_two.pub': False
+            '/etc/wireguard/clients/client_two.pub': False,
+            '/etc/wireguard/clients/client_two.endpoint': False
         }
 
         self.file_system.write_text_result_map = {
@@ -87,8 +89,10 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.file_system.path_exists_result_map = {
             '/etc/wireguard/clients/client_one.key': True,
             '/etc/wireguard/clients/client_one.pub': True,
+            '/etc/wireguard/clients/client_one.endpoint': True,
             '/etc/wireguard/clients/client_two.key': True,
-            '/etc/wireguard/clients/client_two.pub': True
+            '/etc/wireguard/clients/client_two.pub': True,
+            '/etc/wireguard/clients/client_two.endpoint': True
         }
 
         # Act
@@ -100,8 +104,10 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
             [
                 '/etc/wireguard/clients/client_one.key',
                 '/etc/wireguard/clients/client_one.pub',
+                '/etc/wireguard/clients/client_one.endpoint',
                 '/etc/wireguard/clients/client_two.key',
-                '/etc/wireguard/clients/client_two.pub'
+                '/etc/wireguard/clients/client_two.pub',
+                '/etc/wireguard/clients/client_two.endpoint'
             ]
         )
 
@@ -115,11 +121,17 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
             [
                 [
                     'umask 077',
-                    f'wg genkey | tee /etc/wireguard/clients/client_one.key | wg pubkey > /etc/wireguard/clients/client_one.pub'
+                    'wg genkey | tee /etc/wireguard/clients/client_one.key | wg pubkey > /etc/wireguard/clients/client_one.pub'
                 ],
                 [
                     'umask 077',
-                    f'wg genkey | tee /etc/wireguard/clients/client_two.key | wg pubkey > /etc/wireguard/clients/client_two.pub'
+                    'wg genkey | tee /etc/wireguard/clients/client_two.key | wg pubkey > /etc/wireguard/clients/client_two.pub'
+                ],
+                [
+                    'sudo ufw allow 51820/udp',
+                    'sudo systemctl enable wg-quick@wg0',
+                    'sudo systemctl start wg-quick@wg0',
+                    'sudo wg'
                 ]
             ]
         )
@@ -129,8 +141,10 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.file_system.path_exists_result_map = {
             '/etc/wireguard/clients/client_one.key': True,
             '/etc/wireguard/clients/client_one.pub': True,
+            '/etc/wireguard/clients/client_one.endpoint': True,
             '/etc/wireguard/clients/client_two.key': False,
-            '/etc/wireguard/clients/client_two.pub': True
+            '/etc/wireguard/clients/client_two.pub': True,
+            '/etc/wireguard/clients/client_two.endpoint': True
         }
 
         # Act
@@ -143,6 +157,12 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
                 [
                     'umask 077',
                     f'wg genkey | tee /etc/wireguard/clients/client_two.key | wg pubkey > /etc/wireguard/clients/client_two.pub'
+                ],
+                [
+                    'sudo ufw allow 51820/udp',
+                    'sudo systemctl enable wg-quick@wg0',
+                    'sudo systemctl start wg-quick@wg0',
+                    'sudo wg'
                 ]
             ]
         )
@@ -269,9 +289,21 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(
             self.file_system.write_text_params,
             [
-                WriteTextParams('/etc/wireguard/wg0.conf',
-                                'wireguard-server-config'),
                 WriteTextParams(
-                    '/dev/usb/wireguard_clients/wireguard_clients.config', 'wireguard-clients-config')
+                    path_location='/etc/wireguard/clients/client_one.endpoint',
+                    text='10.10.0.2'
+                ),
+                WriteTextParams(
+                    path_location='/etc/wireguard/clients/client_two.endpoint',
+                    text='10.10.0.3'
+                ),
+                WriteTextParams(
+                    '/etc/wireguard/wg0.conf',
+                    'wireguard-server-config'
+                ),
+                WriteTextParams(
+                    '/dev/usb/wireguard_clients/wireguard_clients.config',
+                    'wireguard-clients-config'
+                )
             ]
         )

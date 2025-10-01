@@ -148,9 +148,22 @@ class TestNftablesUbuntuConfigurationTask(unittest.TestCase):
             self.controller.run_raw_commands_params,
             [
                 [
+                    'sudo apt-get update',
+                    'sudo apt-get install -y iptables nftables',
+                    'sudo update-alternatives --set iptables   /usr/sbin/iptables-nft',
+                    'sudo update-alternatives --set ip6tables  /usr/sbin/ip6tables-nft',
+                    'sudo update-alternatives --set arptables  /usr/sbin/arptables-nft',
+                    'sudo update-alternatives --set ebtables   /usr/sbin/ebtables-nft',
                     'sudo nft -f /etc/nftables.conf',
-                    'sudo systemctl restart nftables'
-                    'sudo systemctl enable nftables'
+                    'sudo systemctl restart nftables',
+                    'sudo systemctl enable nftables',
+                    'echo "br_netfilter" | sudo tee /etc/modules-load.d/br_netfilter.conf >/dev/null',
+                    'echo "net.bridge.bridge-nf-call-iptables = 1" | sudo tee /etc/sysctl.d/99-bridge-nf.conf >/dev/null',
+                    'echo "net.ipv4.ip_forward = 1"               | sudo tee /etc/sysctl.d/99-ipforward.conf   >/dev/null',
+                    'sudo modprobe br_netfilter',
+                    'sudo sysctl --system',
+                    'sudo sed -i \'s/^DEFAULT_FORWARD_POLICY=.*/DEFAULT_FORWARD_POLICY="ACCEPT"/\' /etc/default/ufw',
+                    'sudo ufw reload'
                 ]
             ]
         )

@@ -5,9 +5,14 @@
   "python.testing.pytestEnabled": true,
   "python.testing.pytestArgs": ["tests"],
   "python.envFile": "${workspaceFolder}/.env",
+  // Make autopep8 the formatter and run it on save
   "editor.formatOnSave": true,
-  "files.autoSave": "afterDelay",
-  "python.linting.pylintEnabled": true,
-  "python.linting.pylintPath": ".venv/bin/pylint",
-  "python.formatting.autopep8Path": ".venv/bin/autopep8"
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.autopep8",
+    "editor.formatOnSave": true
+  },
+
+  // Point extensions to tools in your venv
+  "autopep8.path": ["${workspaceFolder}/.venv/bin/autopep8"],
+  "pylint.path": ["${workspaceFolder}/.venv/bin/pylint"]
 }

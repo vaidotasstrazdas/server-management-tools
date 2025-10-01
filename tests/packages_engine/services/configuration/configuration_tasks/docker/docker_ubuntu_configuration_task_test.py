@@ -109,6 +109,15 @@ class TestDockerUbuntuConfigurationTask(unittest.TestCase):
                 [
                     'sudo chown -R 999:999 /srv/postgres/data',
                     'sudo chown -R 5050:5050 /srv/pgadmin/data',
+                    'sudo chmod -R 0755 /srv/postgres',
+                    'sudo chmod -R 0755 /srv/gitea',
+                    'sudo chmod -R 0755 /srv/pgadmin',
+                    'sudo docker network create vpn-internal || true',
+                    'sudo systemctl restart docker',
+                    'cd /srv/stack && sudo docker compose down',
+                    'sudo docker stop $(sudo docker ps -a -q) || true',
+                    'sudo docker rm $(sudo docker ps -a -q) || true',
+                    'sudo docker container prune -f',
                     'cd /srv/stack && sudo docker compose up -d'
                 ]
             ]

@@ -1005,7 +1005,7 @@ class TestFileSystemService(unittest.TestCase):
         # Assert
         self.assertEqual(
             self.mockSystemManagementService.execute_raw_command_params,
-            ['sudo cp -a from to']
+            ['sudo mkdir -p to && sudo cp -a from to']
         )
 
     @patch(f'{package_name}.Path.exists')
