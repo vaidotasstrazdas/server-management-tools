@@ -14,5 +14,8 @@
 
   // Point extensions to tools in your venv
   "autopep8.path": ["${workspaceFolder}/.venv/bin/autopep8"],
-  "pylint.path": ["${workspaceFolder}/.venv/bin/pylint"]
+  "pylint.path": ["${workspaceFolder}/.venv/bin/pylint"],
+  "pylint.args": [
+    "--disable=too-few-public-methods"
+  ]
 }

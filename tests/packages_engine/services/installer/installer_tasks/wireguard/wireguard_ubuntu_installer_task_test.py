@@ -1,13 +1,14 @@
+"""Imports necessary to instantiate the tests for the Wireguard installation task on Linux Ubuntu Server platform."""
 import unittest
-
 from packages_engine.models import OperationResult
-
 from packages_engine.services.notifications.notifications_service_mock import MockNotificationsService
 from packages_engine.services.package_controller.package_controller_service_mock import MockPackageControllerService
 from packages_engine.services.system_management_engine.system_management_engine_service_mock import MockSystemManagementEngineService
 from packages_engine.services.installer.installer_tasks.wireguard import WireguardUbuntuInstallerTask
 
+
 class TestWireguardUbuntuInstallerTask(unittest.TestCase):
+    """Tests of Wireguard installer task on Linux Ubuntu Server platform."""
     notifications: MockNotificationsService
     engine: MockSystemManagementEngineService
     controller: MockPackageControllerService
@@ -17,9 +18,12 @@ class TestWireguardUbuntuInstallerTask(unittest.TestCase):
         self.notifications = MockNotificationsService()
         self.engine = MockSystemManagementEngineService()
         self.controller = MockPackageControllerService()
-        self.task = WireguardUbuntuInstallerTask(self.notifications, self.engine, self.controller)
-    
+        self.task = WireguardUbuntuInstallerTask(self.notifications,
+                                                 self.engine,
+                                                 self.controller)
+
     def test_checks_for_wireguard_installation_status(self):
+        """Checks for Wireguard installation status"""
         # Act
         self.task.install()
 
@@ -28,6 +32,7 @@ class TestWireguardUbuntuInstallerTask(unittest.TestCase):
         self.assertEqual(params, ['wireguard'])
 
     def test_notification_flow_when_wireguard_installed_already(self):
+        """Notification flow when Wireguard installed already"""
         # Arrange
         self.engine.is_installed_result = True
 
@@ -39,8 +44,9 @@ class TestWireguardUbuntuInstallerTask(unittest.TestCase):
         self.assertEqual(
             params,
             [
-                {'type':'info','text':'WireGuard will be installed now if it is not installed.'},
-                {'type':'success','text':'\tWireGuard is installed already. Nothing needs to be done.'},
+                {'type': 'info', 'text': 'WireGuard will be installed now if it is not installed.'},
+                {'type': 'success',
+                    'text': '\tWireGuard is installed already. Nothing needs to be done.'},
             ]
         )
 
@@ -56,7 +62,7 @@ class TestWireguardUbuntuInstallerTask(unittest.TestCase):
         self.assertEqual(
             params,
             [
-                {'type':'info','text':'WireGuard will be installed now if it is not installed.'}
+                {'type': 'info', 'text': 'WireGuard will be installed now if it is not installed.'}
             ]
         )
 
@@ -94,7 +100,7 @@ class TestWireguardUbuntuInstallerTask(unittest.TestCase):
                     'sudo mkdir -p /etc/wireguard/clients',
                     'sudo chmod 700 /etc/wireguard/clients',
                     'umask 077',
-                    'sudo wg genkey | sudo tee /etc/wireguard/server.key | wg pubkey | sudo tee /etc/wireguard/server.pub'
+                    'sudo wg genkey | sudo tee /etc/wireguard/server.key | sudo wg pubkey | sudo tee /etc/wireguard/server.pub'
                 ]
             ]
         )
@@ -102,7 +108,8 @@ class TestWireguardUbuntuInstallerTask(unittest.TestCase):
     def test_returns_result_from_packages_controller_when_wireguard_not_installed(self):
         # Arrange
         self.engine.is_installed_result = False
-        self.controller.run_raw_commands_result = OperationResult[bool].succeed(True)
+        self.controller.run_raw_commands_result = OperationResult[bool].succeed(
+            True)
 
         # Act
         result = self.task.install()
@@ -113,7 +120,8 @@ class TestWireguardUbuntuInstallerTask(unittest.TestCase):
     def test_returns_success_result_when_wireguard_installed(self):
         # Arrange
         self.engine.is_installed_result = True
-        self.controller.run_raw_commands_result = OperationResult[bool].fail('failure')
+        self.controller.run_raw_commands_result = OperationResult[bool].fail(
+            'failure')
 
         # Act
         result = self.task.install()
