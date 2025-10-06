@@ -20,6 +20,16 @@ class WireguardUbuntuConfigurationTask(ConfigurationTask):
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        # Necessary additional configs to be added.
+        # Optional one-time server key generation (safe, idempotent)
+        # "test -f /etc/wireguard/server.key || "
+        # "sudo sh -c 'umask 077; wg genkey | tee /etc/wireguard/server.key | "
+        # "wg pubkey | tee /etc/wireguard/server.pub >/dev/null'",
+        # Do NOT start/enable wg-quick@wg0 here
+        # UFW open only if UFW is active (or omit entirely)
+        # "ufw status | grep -q \"Status: active\" && sudo ufw allow 51820/udp || true",
+        # 'sudo systemctl enable wg-quick@wg0',
+        # 'sudo systemctl start wg-quick@wg0',
         index = 2
         for client_name in data.wireguard_client_names:
             endpoint = f'10.10.0.{index}'
@@ -51,7 +61,7 @@ class WireguardUbuntuConfigurationTask(ConfigurationTask):
             f'{data.clients_data_dir}/wireguard_clients.config', shared_config_result.data)
         if not write_shared_config_result.success:
             return write_shared_config_result.as_fail()
-        
+
         run_result = self.controller.run_raw_commands([
             'sudo ufw allow 51820/udp',
             'sudo systemctl enable wg-quick@wg0',
@@ -78,7 +88,8 @@ class WireguardUbuntuConfigurationTask(ConfigurationTask):
             f'wg genkey | tee {client_private_key_path} | wg pubkey > {client_public_key_path}'
         ])
 
-        write_result = self.file_system.write_text(client_endpoint_path, endpoint)
+        write_result = self.file_system.write_text(
+            client_endpoint_path, endpoint)
         if not write_result.success:
             return write_result.as_fail()
 

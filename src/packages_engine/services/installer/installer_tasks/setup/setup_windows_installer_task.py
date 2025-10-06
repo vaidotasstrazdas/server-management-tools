@@ -3,7 +3,7 @@ from packages_engine.models import OperationResult
 from packages_engine.services.installer.installer_tasks import InstallerTask
 
 
-class WireguardWindowsInstallerTask(InstallerTask):
+class SetupWindowsInstallerTask(InstallerTask):
     """Stub task."""
 
     def install(self) -> OperationResult[bool]:

@@ -1,4 +1,4 @@
-"""Modules necessary for the Wireguard installer task implementation."""
+"""Modules necessary for the Setup installer task implementation."""
 from packages_engine.models import OperationResult
 from packages_engine.services.installer.installer_tasks import InstallerTask
 from packages_engine.services.notifications import NotificationsServiceContract
@@ -6,8 +6,8 @@ from packages_engine.services.package_controller import PackageControllerService
 from packages_engine.services.system_management_engine import SystemManagementEngineService
 
 
-class WireguardUbuntuInstallerTask(InstallerTask):
-    """Wireguard Installer Task implementation on Linux Ubuntu Server platform"""
+class SetupUbuntuInstallerTask(InstallerTask):
+    """Setup Installer Task implementation on Linux Ubuntu Server platform"""
 
     def __init__(
             self,
@@ -20,20 +20,12 @@ class WireguardUbuntuInstallerTask(InstallerTask):
 
     def install(self) -> OperationResult[bool]:
         self.notifications.info(
-            'WireGuard will be installed now if it is not installed.'
+            'Installation setup task will be executed before installing other dependencies'
         )
 
-        is_installed = self.engine.is_installed(
-            'wireguard') and self.engine.is_installed('wireguard-tools')
-        if is_installed:
-            self.notifications.success(
-                '\tWireGuard is installed already. Nothing needs to be done.'
-            )
-            return OperationResult[bool].succeed(True)
-
         result = self.controller.run_raw_commands([
-            "sudo DEBIAN_FRONTEND=noninteractive apt-get install -y wireguard wireguard-tools",
-            "sudo install -d -m 0700 -o root -g root /etc/wireguard /etc/wireguard/clients",
+            'sudo DEBIAN_FRONTEND=noninteractive apt-get update',
+            'sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates curl gnupg lsb-release',
         ])
 
         if not result.success:

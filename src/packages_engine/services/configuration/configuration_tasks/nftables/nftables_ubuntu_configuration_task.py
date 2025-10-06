@@ -20,6 +20,7 @@ class NftablesUbuntuConfigurationTask(ConfigurationTask):
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        # Do not forget this: 'sudo systemctl enable --now nftables'
 
         self.notifications.info('Reading Nftables Config template data.')
         read_result = self.reader.read(
