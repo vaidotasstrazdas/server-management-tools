@@ -22,7 +22,7 @@ class ConfigurationDataReaderService(ConfigurationDataReaderServiceContract):
         if not stored is None:
             option = self.input_collection.read_str(
                 "You have stored configuration data. Type 'y' if you want to use stored data."
-            )
+            ).strip()
             if option in ("y", "Y"):
                 return stored
 
@@ -64,5 +64,8 @@ class ConfigurationDataReaderService(ConfigurationDataReaderServiceContract):
             return None
 
         data = read_result.data
-        config_data = ConfigurationData.from_object(data)
-        return config_data
+        try:
+            config_data = ConfigurationData.from_object(data)
+            return config_data
+        except KeyError:
+            return None
