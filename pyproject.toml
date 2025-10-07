@@ -15,10 +15,25 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.4.2", "pytest-cov>=7.0.0", "pylint>=3.3.8", "autopep8>=2.3.2", "isort>=6.0.1"]
+dev = [
+  "pytest>=8.4.2",
+  "pytest-cov>=7.0.0",
+  "pylint>=3.3.8",
+  "black>=25.9.0",
+  "isort>=6.1.0"
+]
 
 [tool.setuptools]
 package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+skip-string-normalization = false
+
+[tool.isort]
+profile = "black"
+line_length = 100

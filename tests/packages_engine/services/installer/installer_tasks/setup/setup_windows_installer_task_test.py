@@ -3,18 +3,18 @@
 import unittest
 
 from packages_engine.models import OperationResult
-from packages_engine.services.installer.installer_tasks.wireguard import (
-    WireguardWindowsInstallerTask,
+from packages_engine.services.installer.installer_tasks.setup import (
+    SetupWindowsInstallerTask,
 )
 
 
-class TestWireguardWindowsInstallerTask(unittest.TestCase):
+class TestSetupWindowsInstallerTask(unittest.TestCase):
     """Tests for the Windows installer task."""
 
-    task: WireguardWindowsInstallerTask
+    task: SetupWindowsInstallerTask
 
     def setUp(self):
-        self.task = WireguardWindowsInstallerTask()
+        self.task = SetupWindowsInstallerTask()
 
     def test_returns_unsupported_error(self):
         """Returns unsupported error."""

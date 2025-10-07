@@ -1,4 +1,5 @@
 """Modules necessary for the Wireguard installer task implementation."""
+
 from packages_engine.models import OperationResult
 from packages_engine.services.installer.installer_tasks import InstallerTask
 from packages_engine.services.notifications import NotificationsServiceContract
@@ -10,35 +11,35 @@ class WireguardUbuntuInstallerTask(InstallerTask):
     """Wireguard Installer Task implementation on Linux Ubuntu Server platform"""
 
     def __init__(
-            self,
-            notifications: NotificationsServiceContract,
-            engine: SystemManagementEngineService,
-            controller: PackageControllerServiceContract):
+        self,
+        notifications: NotificationsServiceContract,
+        engine: SystemManagementEngineService,
+        controller: PackageControllerServiceContract,
+    ):
         self.notifications = notifications
         self.engine = engine
         self.controller = controller
 
     def install(self) -> OperationResult[bool]:
-        self.notifications.info(
-            'WireGuard will be installed now if it is not installed.'
-        )
+        self.notifications.info("WireGuard will be installed now if it is not installed.")
 
-        is_installed = self.engine.is_installed(
-            'wireguard') and self.engine.is_installed('wireguard-tools')
+        is_installed = self.engine.is_installed("wireguard") and self.engine.is_installed(
+            "wireguard-tools"
+        )
         if is_installed:
             self.notifications.success(
-                '\tWireGuard is installed already. Nothing needs to be done.'
+                "\tWireGuard is installed already. Nothing needs to be done."
             )
             return OperationResult[bool].succeed(True)
 
-        result = self.controller.run_raw_commands([
-            "sudo DEBIAN_FRONTEND=noninteractive apt-get install -y wireguard wireguard-tools",
-            "sudo install -d -m 0700 -o root -g root /etc/wireguard /etc/wireguard/clients",
-        ])
+        result = self.controller.run_raw_commands(
+            [
+                "sudo DEBIAN_FRONTEND=noninteractive apt-get install -y wireguard wireguard-tools",
+                "sudo install -d -m 0700 -o root -g root /etc/wireguard /etc/wireguard/clients",
+            ]
+        )
 
         if not result.success:
-            self.notifications.error(
-                f'Command failed. Message: {result.message}.'
-            )
+            self.notifications.error(f"Command failed. Message: {result.message}.")
 
         return result
