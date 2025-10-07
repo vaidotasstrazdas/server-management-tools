@@ -1,0 +1,24 @@
+table inet host_fw {
+  chain input {
+    type filter hook input priority 0;
+    policy accept;              # start permissive; tighten later
+
+    # Loopback & established
+    iifname "lo" accept
+    ct state established,related accept
+
+    # WireGuard
+    udp dport 51820 accept
+
+    # DNS for WG clients only
+    iifname "wg0" udp dport 53 accept
+    iifname "wg0" tcp dport 53 accept
+
+    # Client-specific allowances on wg0
+    iifname "wg0" ip saddr 10.10.0.2 accept
+    iifname "wg0" ip saddr {10.10.0.2, 10.10.0.3} tcp dport {5432,2222} accept
+
+    # HTTP/HTTPS for WG only (public exposure to be handled by Nginx config later)
+    iifname "wg0" tcp dport {80,443} accept
+  }
+}

@@ -1,3 +1,5 @@
+""" "Necessary imports to implement the File System Service mock."""
+
 from dataclasses import dataclass
 from typing import Dict
 
@@ -8,30 +10,52 @@ from .file_system_service_contract import FileSystemServiceContract
 
 @dataclass
 class WriteTextParams:
+    """Params of the write_text method."""
+
     path_location: str
     text: str
 
 
 @dataclass
+class WriteJsonParams:
+    """Params of the write_json method."""
+
+    path_location: str
+    data: object
+
+
+@dataclass
 class ChmodParams:
+    """Params of the chmod method."""
+
     path_location: str
     chmod: int
 
 
 @dataclass
 class CopyPathParams:
+    """Params of the copy_path method."""
+
     location_from: str
     location_to: str
 
 
 class MockFileSystemService(FileSystemServiceContract):
+    """File System Service Mock implementation."""
+
     def __init__(self):
         self.read_text_params: list[str] = []
-        self.read_text_result = OperationResult[str].succeed('')
+        self.read_text_result = OperationResult[str].succeed("")
         self.read_text_result_map: Dict[str, OperationResult[str]] = {}
         self.write_text_params: list[WriteTextParams] = []
         self.write_text_result = OperationResult[bool].succeed(True)
         self.write_text_result_map: Dict[str, OperationResult[bool]] = {}
+        self.read_json_params: list[str] = []
+        self.read_json_result = OperationResult[object].succeed({})
+        self.read_json_result_map: Dict[str, OperationResult[object]] = {}
+        self.write_json_params: list[WriteJsonParams] = []
+        self.write_json_result = OperationResult[bool].succeed(True)
+        self.write_json_result_map: Dict[str, OperationResult[bool]] = {}
         self.make_dir_params: list[str] = []
         self.make_dir_result = OperationResult[bool].succeed(True)
         self.chmod_params: list[ChmodParams] = []
@@ -62,6 +86,22 @@ class MockFileSystemService(FileSystemServiceContract):
 
         return self.write_text_result
 
+    def read_json(self, path_location: str) -> OperationResult[object]:
+        self.read_json_params.append(path_location)
+
+        if path_location in self.read_json_result_map:
+            return self.read_json_result_map[path_location]
+
+        return self.read_json_result
+
+    def write_json(self, path_location: str, data: object) -> OperationResult[bool]:
+        self.write_json_params.append(WriteJsonParams(path_location, data))
+
+        if path_location in self.write_json_result_map:
+            return self.write_json_result_map[path_location]
+
+        return self.write_json_result
+
     def make_dir(self, path_location: str) -> OperationResult[bool]:
         self.make_dir_params.append(path_location)
         return self.make_dir_result
@@ -87,10 +127,9 @@ class MockFileSystemService(FileSystemServiceContract):
         return self.path_exists_result
 
     def copy_path(self, location_from: str, location_to: str) -> OperationResult[bool]:
-        self.copy_path_params.append(
-            CopyPathParams(location_from, location_to))
+        self.copy_path_params.append(CopyPathParams(location_from, location_to))
 
-        copy_sequence = f'{location_from}->{location_to}'
+        copy_sequence = f"{location_from}->{location_to}"
         if copy_sequence in self.copy_path_result_map:
             return self.copy_path_result_map[copy_sequence]
 
