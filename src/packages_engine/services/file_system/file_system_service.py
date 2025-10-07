@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from typing import Any
 
 from packages_engine.models import OperationResult
 from packages_engine.services.system_management import SystemManagementServiceContract
@@ -44,7 +45,7 @@ class FileSystemService(FileSystemServiceContract):
 
         return OperationResult[bool].succeed(True)
 
-    def read_json(self, path_location: str) -> OperationResult[object]:
+    def read_json(self, path_location: str) -> OperationResult[Any]:
         check_result = self._check_path(path_location)
         if not check_result.success:
             return check_result.as_fail()
@@ -53,22 +54,22 @@ class FileSystemService(FileSystemServiceContract):
         try:
             with open(path, "r", encoding="utf-8") as file:
                 data = json.load(file)
-            return OperationResult[object].succeed(data)
+            return OperationResult[Any].succeed(data)
 
         except json.JSONDecodeError:
-            return OperationResult[object].fail(
+            return OperationResult[Any].fail(
                 f"Error: Failed to decode JSON from the file. Path: {path_location}"
             )
 
-    def write_json(self, path_location: str, data: object) -> OperationResult[bool]:
+    def write_json(self, path_location: str, data: Any) -> OperationResult[bool]:
         path = self._get_path(path_location)
         if path.exists() and not path.is_file():
             return OperationResult[bool].fail(f"Path {path_location} is not a file")
 
         if not path.exists():
             absolute_path = path.absolute().as_posix()
-            execute_command_result = self.system_management_service.execute_command(
-                ["touch", absolute_path]
+            execute_command_result = self.system_management_service.execute_raw_command(
+                f"sudo install -Dv /dev/null {absolute_path}"
             )
             if not execute_command_result.success:
                 return execute_command_result.as_fail()

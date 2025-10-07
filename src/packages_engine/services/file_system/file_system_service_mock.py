@@ -1,7 +1,7 @@
 """ "Necessary imports to implement the File System Service mock."""
 
 from dataclasses import dataclass
-from typing import Dict
+from typing import Any, Dict
 
 from packages_engine.models import OperationResult
 
@@ -21,7 +21,7 @@ class WriteJsonParams:
     """Params of the write_json method."""
 
     path_location: str
-    data: object
+    data: Any
 
 
 @dataclass
@@ -51,8 +51,8 @@ class MockFileSystemService(FileSystemServiceContract):
         self.write_text_result = OperationResult[bool].succeed(True)
         self.write_text_result_map: Dict[str, OperationResult[bool]] = {}
         self.read_json_params: list[str] = []
-        self.read_json_result = OperationResult[object].succeed({})
-        self.read_json_result_map: Dict[str, OperationResult[object]] = {}
+        self.read_json_result = OperationResult[Any].succeed({})
+        self.read_json_result_map: Dict[str, OperationResult[Any]] = {}
         self.write_json_params: list[WriteJsonParams] = []
         self.write_json_result = OperationResult[bool].succeed(True)
         self.write_json_result_map: Dict[str, OperationResult[bool]] = {}
@@ -86,7 +86,7 @@ class MockFileSystemService(FileSystemServiceContract):
 
         return self.write_text_result
 
-    def read_json(self, path_location: str) -> OperationResult[object]:
+    def read_json(self, path_location: str) -> OperationResult[Any]:
         self.read_json_params.append(path_location)
 
         if path_location in self.read_json_result_map:
@@ -94,7 +94,7 @@ class MockFileSystemService(FileSystemServiceContract):
 
         return self.read_json_result
 
-    def write_json(self, path_location: str, data: object) -> OperationResult[bool]:
+    def write_json(self, path_location: str, data: Any) -> OperationResult[bool]:
         self.write_json_params.append(WriteJsonParams(path_location, data))
 
         if path_location in self.write_json_result_map:

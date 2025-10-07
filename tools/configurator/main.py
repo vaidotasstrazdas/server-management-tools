@@ -54,9 +54,9 @@ def main():
     notifications_service = NotificationsService()
 
     input_collection = InputCollectionService()
-    config_reader = ConfigurationDataReaderService(input_collection)
-
     file_system = FileSystemService(system_management_service)
+    config_reader = ConfigurationDataReaderService(input_collection, file_system)
+
     wireguard_server_config_reader = WireguardServerConfigContentReader(file_system)
     wireguard_shared_config_reader = WireguardSharedConfigContentReader(file_system)
     raw_string_reader = RawStringContentReader(file_system)

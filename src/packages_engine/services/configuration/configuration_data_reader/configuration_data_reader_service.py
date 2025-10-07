@@ -19,6 +19,13 @@ class ConfigurationDataReaderService(ConfigurationDataReaderServiceContract):
         self.file_system = file_system
 
     def read(self, stored: ConfigurationData | None = None) -> ConfigurationData:
+        if not stored is None:
+            option = self.input_collection.read_str(
+                "You have stored configuration data. Type 'y' if you want to use stored data."
+            )
+            if option in ("y", "Y"):
+                return stored
+
         data = ConfigurationData.default()
 
         data.server_data_dir = self.input_collection.read_str("Server data directory", "srv")
@@ -45,8 +52,17 @@ class ConfigurationDataReaderService(ConfigurationDataReaderServiceContract):
             "Mounted directory for the Clients Configuration"
         )
 
+        self.file_system.write_json(
+            "/usr/local/share/args/configuration_data.json", data.as_object()
+        )
+
         return data
 
     def load_stored(self) -> ConfigurationData | None:
-        self.load_stored_triggered_times = self.load_stored_triggered_times + 1
-        return self.load_stored_result
+        read_result = self.file_system.read_json("/usr/local/share/args/configuration_data.json")
+        if not read_result.success or read_result.data is None:
+            return None
+
+        data = read_result.data
+        config_data = ConfigurationData.from_object(data)
+        return config_data

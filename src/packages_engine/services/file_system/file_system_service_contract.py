@@ -1,6 +1,7 @@
 """Imports necessary to define the contract."""
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 from packages_engine.models import OperationResult
 
@@ -17,12 +18,12 @@ class FileSystemServiceContract(ABC):
         """Writes the text into the specified path."""
 
     @abstractmethod
-    def read_json(self, path_location: str) -> OperationResult[object]:
-        """Reads the data from the specified path in object representation."""
+    def read_json(self, path_location: str) -> OperationResult[Any]:
+        """Reads the data from the specified path in any type representation."""
 
     @abstractmethod
-    def write_json(self, path_location: str, data: object) -> OperationResult[bool]:
-        """Writes the data into the specified path in object representation."""
+    def write_json(self, path_location: str, data: Any) -> OperationResult[bool]:
+        """Writes the data into the specified path in any type representation."""
 
     @abstractmethod
     def make_dir(self, path_location: str) -> OperationResult[bool]:
