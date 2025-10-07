@@ -21,6 +21,5 @@ class ConfigureCommand:
         config_data = self.config_data_reader.read(stored_config_data)
         for task in self.tasks:
             configure_result = task.configure(config_data)
-            print("config result", configure_result.success)
             if not configure_result.success:
                 return
