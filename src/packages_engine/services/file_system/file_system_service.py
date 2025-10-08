@@ -35,8 +35,8 @@ class FileSystemService(FileSystemServiceContract):
 
         if not path.exists():
             absolute_path = path.absolute().as_posix()
-            execute_command_result = self.system_management_service.execute_command(
-                ["touch", absolute_path]
+            execute_command_result = self.system_management_service.execute_raw_command(
+                f"sudo install -Dv /dev/null {absolute_path}"
             )
             if not execute_command_result.success:
                 return execute_command_result.as_fail()

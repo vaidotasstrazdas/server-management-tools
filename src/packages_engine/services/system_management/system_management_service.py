@@ -1,3 +1,5 @@
+"""System Management Service - implements low-level system operations."""
+
 from typing import Optional
 
 from packages_engine.models.operation_result import OperationResult
@@ -7,6 +9,10 @@ from .system_management_service_contract import SystemManagementServiceContract
 
 
 class SystemManagementService(SystemManagementServiceContract):
+    """
+    Class implementing the contract for system management services.
+    """
+
     engine: SystemManagementEngineService
 
     def __init__(self, engine: SystemManagementEngineService):

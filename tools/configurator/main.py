@@ -53,7 +53,7 @@ def main():
 
     notifications_service = NotificationsService()
 
-    input_collection = InputCollectionService()
+    input_collection = InputCollectionService(notifications_service)
     file_system = FileSystemService(system_management_service)
     config_reader = ConfigurationDataReaderService(input_collection, file_system)
 
