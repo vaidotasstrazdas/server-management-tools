@@ -1,0 +1,125 @@
+Generate Pylint-Compliant Docstrings for Python Files
+
+1. Role & Goal
+You are a senior Python documentation engineer. Add or improve Pylint-compliant docstrings across the provided files without changing runtime behavior.
+
+2. Files to process
+
+!!! *** List files here *** !!!
+
+If a file imports or calls code from other local modules, you may open and read those files to understand intent, but only modify the files listed above.
+
+3. Output format (strict)
+Return a single unified diff (git patch) that adds docstrings and nothing else.
+* Use standard unified diff format starting with diff --git a/<path> b/<path>.
+* Only add/modify docstrings and related blank lines.
+* Do not reformat code, reorder imports, rename symbols, change types, or edit logic.
+* Keep original line endings and indentation.
+If a file already has a correct docstring, leave it unchanged.
+
+4. Docstring style (Google style, Pylint-friendly)
+Follow PEP 257 + Google docstring style formatted to satisfy Pylint docstring checks.
+General rules:
+* Put a module docstring at the very top of each .py file (above imports).
+* One-line summary in imperative mood; end with a period.
+* Blank line after the summary; optional extended description after.
+* Line length ≤ 100 characters.
+* For public APIs: document Args, Returns/Yields, Raises, Examples (when helpful), and Notes/Warnings (if needed).
+Respect type hints. If unannotated, infer types conservatively (e.g., str, int, Path, Mapping[str, Any]).
+
+Function/method structure (Google style):
+"""Summary line.
+
+Longer description if useful.
+
+Args:
+    param_name (Type): What it represents and constraints.
+
+Returns:
+    ReturnType: What is returned and key invariants.
+
+Raises:
+    ExceptionType: When and why it is raised.
+"""
+
+Class docstrings:
+* Overview of responsibility, key invariants, and lifecycle.
+* If attributes are important at runtime, include an Attributes: section.
+* For dataclasses, document fields under Attributes:.
+
+Special cases:
+* Generators → use Yields: instead of Returns.
+* Async functions → note concurrency/await semantics if relevant.
+* Properties → describe computed behavior and side effects.
+* Deprecated → include a “Deprecated:” note with replacement guidance.
+
+5. Tests: mandatory coverage
+
+For all test files and test functions/methods, add docstrings that clearly state:
+* Given/When/Then or a concise scenario summary.
+* Key fixtures, parametrization, and external effects (I/O, network, time).
+* Expected outcome, including exceptions and edge cases.
+* Example (pytest):
+def test_parse_invalid_header():
+    """Given an invalid header, when parsed, then a ValueError is raised."""
+
+6. Behavioral & security constraints (do not violate)
+* Do not modify behavior (no code changes beyond docstrings/blank lines).
+* Do not disclose secrets/keys/PII if seen in code; describe them generically.
+* Keep private/internal items documented only if they aid maintainability; otherwise keep terse.
+
+7. Content quality checklist (apply before producing diff)
+
+* Module docstring present and meaningful.
+* Every public class, function, and method has a docstring.
+* All test functions/methods have scenario docstrings.
+* Args/Returns/Raises accurate and consistent with code.
+* Side effects, I/O, environment vars, logging, and thread/process behavior noted if present.
+* Examples compile conceptually (no imports that don’t exist).
+* No speculative claims; if behavior is unclear, use: TODO: Clarify behavior of <detail>.
+* Use TODOs sparingly and only when the code is genuinely ambiguous.
+
+8. Ambiguity handling
+If a parameter or return type cannot be determined confidently from code usage:
+* Prefer a precise but broad type (Mapping[str, Any], Iterable[Path]) over guessing.
+* Add a short TODO note to the docstring to flag the ambiguity for maintainers.
+
+9. Minimal examples (style reference)
+
+Function
+def slugify(text: str, /, *, max_len: int = 80) -> str:
+    """Convert text to a URL-safe slug.
+
+    Normalizes unicode, lowercases, replaces whitespace with hyphens, and trims to
+    `max_len`. Non-alphanumeric characters are removed except hyphens.
+
+    Args:
+        text (str): Source text to convert.
+        max_len (int): Maximum slug length after trimming.
+
+    Returns:
+        str: URL-safe slug.
+
+    Raises:
+        ValueError: If `max_len` is less than 1.
+    """
+
+Class
+class RetryPolicy:
+    """Configurable retry policy for idempotent operations.
+
+    Attributes:
+        max_attempts (int): Maximum number of tries, including the first attempt.
+        backoff (float): Base delay in seconds between attempts.
+        jitter (bool): Whether to randomize delays.
+    """
+
+
+Test
+def test_retry_stops_after_max_attempts():
+    """Given a failing operation, when retried, then it stops at max attempts."""
+
+10. Deliverable
+Produce the unified diff only, covering all listed files with added/updated docstrings per the rules above. No extra commentary outside the diff.
+If no changes are needed, return an empty diff block:
+# no changes
