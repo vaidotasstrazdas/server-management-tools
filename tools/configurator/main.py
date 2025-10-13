@@ -112,7 +112,7 @@ def main():
 
     command = ConfigureCommand(
         config_reader,
-        [nftables],
+        [nftables, dnsmasq],
         # config_reader, [nftables, dnsmasq, wireguard, docker, nginx, autostart]
     )
     command.execute()
