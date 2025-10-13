@@ -35,6 +35,14 @@ from packages_engine.services.configuration.configuration_tasks.wireguard import
     WireguardUbuntuConfigurationTask,
     WireguardWindowsConfigurationTask,
 )
+from packages_engine.services.configuration.configuration_tasks.wireguard_peers import (
+    WireguardPeersUbuntuConfigurationTask,
+    WireguardPeersWindowsConfigurationTask,
+)
+from packages_engine.services.configuration.configuration_tasks.wireguard_share import (
+    WireguardShareUbuntuConfigurationTask,
+    WireguardShareWindowsConfigurationTask,
+)
 from packages_engine.services.file_system import FileSystemService
 from packages_engine.services.input_collection import InputCollectionService
 from packages_engine.services.notifications import NotificationsService
@@ -68,11 +76,25 @@ def main():
     )
     controller = PackageControllerService(system_management_service, notifications_service)
 
+    wireguard_peers = GenericConfigurationTask(
+        WireguardPeersUbuntuConfigurationTask(
+            content_reader, file_system, notifications_service, controller
+        ),
+        WireguardPeersWindowsConfigurationTask(),
+    )
+
     wireguard = GenericConfigurationTask(
         WireguardUbuntuConfigurationTask(
             content_reader, file_system, notifications_service, controller
         ),
         WireguardWindowsConfigurationTask(),
+    )
+
+    wireguard_share = GenericConfigurationTask(
+        WireguardShareUbuntuConfigurationTask(
+            content_reader, file_system, notifications_service, controller
+        ),
+        WireguardShareWindowsConfigurationTask(),
     )
 
     dnsmasq = GenericConfigurationTask(
@@ -112,7 +134,7 @@ def main():
 
     command = ConfigureCommand(
         config_reader,
-        [nftables, dnsmasq],
+        [nftables, dnsmasq, wireguard_peers, wireguard, wireguard_share],
         # config_reader, [nftables, dnsmasq, wireguard, docker, nginx, autostart]
     )
     command.execute()

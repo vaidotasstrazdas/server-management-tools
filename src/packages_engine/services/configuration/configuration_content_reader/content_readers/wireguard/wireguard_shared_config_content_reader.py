@@ -61,7 +61,7 @@ class WireguardSharedConfigContentReader(ContentReader):
         shared_configs = ""
         for client_name in config.wireguard_client_names:
             client_endpoint_result = self.file_system.read_text(
-                f"/etc/wireguard/clients/{client_name}.endpoint"
+                f"/etc/wireguard/clients/{client_name}.ip"
             )
             if not client_endpoint_result.success or client_endpoint_result.data is None:
                 return client_endpoint_result.as_fail()
