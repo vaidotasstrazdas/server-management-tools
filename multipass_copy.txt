@@ -1,0 +1,1 @@
+multipass transfer -r /Users/void/work/opensource/server_managent_tools/dist/. devbox:/home/ubuntu/dist

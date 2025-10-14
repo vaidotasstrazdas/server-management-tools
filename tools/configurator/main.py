@@ -19,9 +19,13 @@ from packages_engine.services.configuration.configuration_tasks.dnsmasq import (
     DnsmasqUbuntuConfigurationTask,
     DnsmasqWindowsConfigurationTask,
 )
-from packages_engine.services.configuration.configuration_tasks.docker import (
-    DockerUbuntuConfigurationTask,
-    DockerWindowsConfigurationTask,
+from packages_engine.services.configuration.configuration_tasks.docker_orchestration import (
+    DockerOrchestrationUbuntuConfigurationTask,
+    DockerOrchestrationWindowsConfigurationTask,
+)
+from packages_engine.services.configuration.configuration_tasks.docker_resources import (
+    DockerResourcesUbuntuConfigurationTask,
+    DockerResourcesWindowsConfigurationTask,
 )
 from packages_engine.services.configuration.configuration_tasks.nftables import (
     NftablesUbuntuConfigurationTask,
@@ -30,6 +34,10 @@ from packages_engine.services.configuration.configuration_tasks.nftables import 
 from packages_engine.services.configuration.configuration_tasks.nginx import (
     NginxUbuntuConfigurationTask,
     NginxWindowsConfigurationTask,
+)
+from packages_engine.services.configuration.configuration_tasks.systemd import (
+    SystemdUbuntuConfigurationTask,
+    SystemdWindowsConfigurationTask,
 )
 from packages_engine.services.configuration.configuration_tasks.wireguard import (
     WireguardUbuntuConfigurationTask,
@@ -111,11 +119,25 @@ def main():
         NftablesWindowsConfigurationTask(),
     )
 
-    docker = GenericConfigurationTask(
-        DockerUbuntuConfigurationTask(
+    systemd = GenericConfigurationTask(
+        SystemdUbuntuConfigurationTask(
             content_reader, file_system, notifications_service, controller
         ),
-        DockerWindowsConfigurationTask(),
+        SystemdWindowsConfigurationTask(),
+    )
+
+    docker_resources = GenericConfigurationTask(
+        DockerResourcesUbuntuConfigurationTask(
+            content_reader, file_system, notifications_service, controller
+        ),
+        DockerResourcesWindowsConfigurationTask(),
+    )
+
+    docker_orchestration = GenericConfigurationTask(
+        DockerOrchestrationUbuntuConfigurationTask(
+            content_reader, file_system, notifications_service, controller
+        ),
+        DockerOrchestrationWindowsConfigurationTask(),
     )
 
     nginx = GenericConfigurationTask(
@@ -134,7 +156,16 @@ def main():
 
     command = ConfigureCommand(
         config_reader,
-        [nftables, dnsmasq, wireguard_peers, wireguard, wireguard_share],
+        [
+            nftables,
+            dnsmasq,
+            wireguard_peers,
+            wireguard,
+            wireguard_share,
+            systemd,
+            docker_resources,
+            docker_orchestration,
+        ],
         # config_reader, [nftables, dnsmasq, wireguard, docker, nginx, autostart]
     )
     command.execute()
