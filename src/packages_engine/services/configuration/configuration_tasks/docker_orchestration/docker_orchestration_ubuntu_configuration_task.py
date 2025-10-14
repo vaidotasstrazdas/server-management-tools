@@ -8,11 +8,6 @@ from packages_engine.services.file_system import FileSystemServiceContract
 from packages_engine.services.notifications import NotificationsServiceContract
 from packages_engine.services.package_controller import PackageControllerServiceContract
 
-# add your primary user; for Multipass it's 'ubuntu'
-# sudo usermod -aG docker ubuntu
-# inform that a new login is required for the group to take effect:
-# echo "Re-login or run: newgrp docker"
-
 
 class DockerOrchestrationUbuntuConfigurationTask(ConfigurationTask):
     def __init__(
@@ -38,8 +33,7 @@ class DockerOrchestrationUbuntuConfigurationTask(ConfigurationTask):
             "test -f /etc/docker/daemon.json || echo '{}' | sudo tee /etc/docker/daemon.json >/dev/null",
             # merge DNS & search domain (idempotent & deduped)
             f"sudo jq --arg dns '10.10.0.1' --arg search '{data.domain_name}' "
-            r"'.dns = ((.dns // []) + [$dns] | unique) | "
-            r".\"dns-search\" = ((.\"dns-search\" // []) + [$search] | unique)' "
+            '\'.dns = ((.dns // []) + [$dns] | unique) | ."dns-search" = ((."dns-search" // []) + [$search] | unique)\' '
             "/etc/docker/daemon.json | sudo tee /etc/docker/daemon.json.tmp >/dev/null && "
             "sudo mv /etc/docker/daemon.json.tmp /etc/docker/daemon.json && "
             "sudo chown root:root /etc/docker/daemon.json && sudo chmod 0644 /etc/docker/daemon.json",
@@ -51,10 +45,26 @@ class DockerOrchestrationUbuntuConfigurationTask(ConfigurationTask):
             "sudo systemctl restart docker",
             # compose: pull updated images and up with --remove-orphans
             "cd /srv/stack && sudo docker compose pull --quiet || true",
+            "cd /srv/stack && sudo docker compose config -q",
             "cd /srv/stack && sudo docker compose up -d --remove-orphans",
             # wait for healthchecks so subsequent tasks can rely on services being ready
             "cd /srv/stack && sudo docker compose ps",
-            "cd /srv/stack && sudo docker compose wait || true",
+            "timeout 120 bash -lc '"
+            '  echo "Waiting for Postgres health=healthy…";'
+            "  until [[ $(docker inspect -f {{.State.Health.Status}} postgres 2>/dev/null || echo none) == healthy ]]; do sleep 2; done;"
+            '  echo "Postgres is healthy. Probing Gitea on 127.0.0.1:3000…";'
+            "  for i in {1..60}; do "
+            '    code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/ || true); '
+            '    if [[ $code =~ ^(200|30[12])$ ]]; then echo "Gitea is responding ($code)."; exit 0; fi; '
+            "    sleep 2; "
+            "  done; "
+            '  echo "Gitea did not respond with 200/301/302 within timeout; continuing anyway.";'
+            "' || true",
+            # show ports bound to loopback (host side)
+            "ss -lntup | grep -E '(:5432|:3000|:2222|:8081)\\b' || true",
+            # DNS smoke test from a throwaway container via Docker’s embedded DNS
+            f"sudo docker run --rm --network vpn-internal busybox sh -lc "
+            f"'nslookup gitea.{data.domain_name} 127.0.0.11 && nslookup postgresql.{data.domain_name} 127.0.0.11' || true",
         ]
         start_result = self.controller.run_raw_commands(cmds)
         if not start_result.success:

@@ -67,6 +67,9 @@ class DnsmasqUbuntuConfigurationTask(ConfigurationTask):
                 "sudo chmod 0644 /etc/dnsmasq.d/internal.conf",
                 "sudo systemctl reset-failed dnsmasq || true",
                 "sudo systemctl enable --now dnsmasq",
+                "sudo install -d -m 0755 /etc/systemd/system/dnsmasq.service.d",
+                "sudo bash -lc 'cat > /etc/systemd/system/dnsmasq.service.d/10-after-wg0.conf <<EOF\n[Unit]\nAfter=wg-quick@wg0.service\nWants=wg-quick@wg0.service\nEOF'",
+                "sudo systemctl daemon-reload",
                 "sudo systemctl reload-or-restart dnsmasq",
             ]
         )
