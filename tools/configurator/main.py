@@ -15,6 +15,10 @@ from packages_engine.services.configuration.configuration_tasks.autostart import
     AutostartUbuntuConfigurationTask,
     AutostartWindowsConfigurationTask,
 )
+from packages_engine.services.configuration.configuration_tasks.certificates import (
+    CertificatesUbuntuConfigurationTask,
+    CertificatesWindowsConfigurationTask,
+)
 from packages_engine.services.configuration.configuration_tasks.dnsmasq import (
     DnsmasqUbuntuConfigurationTask,
     DnsmasqWindowsConfigurationTask,
@@ -34,6 +38,10 @@ from packages_engine.services.configuration.configuration_tasks.nftables import 
 from packages_engine.services.configuration.configuration_tasks.nginx import (
     NginxUbuntuConfigurationTask,
     NginxWindowsConfigurationTask,
+)
+from packages_engine.services.configuration.configuration_tasks.share_certificates import (
+    ShareCertificatesUbuntuConfigurationTask,
+    ShareCertificatesWindowsConfigurationTask,
 )
 from packages_engine.services.configuration.configuration_tasks.systemd import (
     SystemdUbuntuConfigurationTask,
@@ -140,6 +148,20 @@ def main():
         DockerOrchestrationWindowsConfigurationTask(),
     )
 
+    certificates = GenericConfigurationTask(
+        CertificatesUbuntuConfigurationTask(
+            content_reader, file_system, notifications_service, controller
+        ),
+        CertificatesWindowsConfigurationTask(),
+    )
+
+    share_certificates = GenericConfigurationTask(
+        ShareCertificatesUbuntuConfigurationTask(
+            content_reader, file_system, notifications_service, controller
+        ),
+        ShareCertificatesWindowsConfigurationTask(),
+    )
+
     nginx = GenericConfigurationTask(
         NginxUbuntuConfigurationTask(
             content_reader, file_system, notifications_service, controller
@@ -165,7 +187,9 @@ def main():
             systemd,
             docker_resources,
             docker_orchestration,
+            certificates,
+            share_certificates,
+            nginx,
         ],
-        # config_reader, [nftables, dnsmasq, wireguard, docker, nginx, autostart]
     )
     command.execute()
