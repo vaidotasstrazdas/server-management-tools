@@ -103,6 +103,7 @@ class NftablesUbuntuConfigurationTask(ConfigurationTask):
                 "sudo nft -f /etc/nftables.d/10-host-fw.nft",
                 # Enable persistence on reboot (service will load /etc/nftables.conf which includes *.nft)
                 "sudo systemctl enable nftables",
+                "sudo ufw disable || true",
                 # Do NOT restart nftables here: it would try to load /etc/nftables.conf again
                 # and might error if it re-runs 'add table' while live. We already applied above.
             ]

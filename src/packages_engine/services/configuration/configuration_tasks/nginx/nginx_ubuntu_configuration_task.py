@@ -32,15 +32,15 @@ class NginxUbuntuConfigurationTask(ConfigurationTask):
             data,
             [
                 {
-                    "template_path": f"/usr/local/share/{data.server_data_dir}/nginx/sites-available/gitea.app",
+                    "template_path": f"/usr/local/share/{data.server_data_dir}/data/nginx/sites-available/gitea.app",
                     "destination_path": "/etc/nginx/sites-available/gitea.app",
                 },
                 {
-                    "template_path": f"/usr/local/share/{data.server_data_dir}/nginx/sites-available/postgresql.app",
+                    "template_path": f"/usr/local/share/{data.server_data_dir}/data/nginx/sites-available/postgresql.app",
                     "destination_path": "/etc/nginx/sites-available/postgresql.app",
                 },
                 {
-                    "template_path": f"/usr/local/share/{data.server_data_dir}/nginx/nginx.conf",
+                    "template_path": f"/usr/local/share/{data.server_data_dir}/data/nginx/nginx.conf",
                     "destination_path": "/etc/nginx/nginx.conf",
                 },
             ],
@@ -52,11 +52,22 @@ class NginxUbuntuConfigurationTask(ConfigurationTask):
         self.notifications.success("Replacing Nginx configurations successful.")
         self.notifications.info("Restarting Nginx.")
 
-        command_result = self.controller.run_raw_commands(["sudo service nginx restart"])
+        self.notifications.info("Enabling sites and validating Nginx config.")
+        command_result = self.controller.run_raw_commands(
+            [
+                "sudo install -d -m 0755 /etc/nginx/sites-enabled",
+                "sudo rm -f /etc/nginx/sites-enabled/default",
+                "sudo ln -sf /etc/nginx/sites-available/gitea.app /etc/nginx/sites-enabled/gitea.app",
+                "sudo ln -sf /etc/nginx/sites-available/postgresql.app /etc/nginx/sites-enabled/postgresql.app",
+                "sudo nginx -t -q",
+                "sudo systemctl reload nginx || sudo systemctl restart nginx || sudo service nginx restart || sudo service nginx start",
+            ]
+        )
+
         if not command_result.success:
-            self.notifications.error("Restarting Nginx failed.")
+            self.notifications.error("Loading Nginx configuration  Nginx failed.")
             return command_result.as_fail()
-        self.notifications.success("Restarting Nginx successful.")
+        self.notifications.success("Loading Nginx configuration successful.")
 
         return OperationResult[bool].succeed(True)
 

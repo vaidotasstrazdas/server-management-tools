@@ -26,7 +26,7 @@ class ShareCertificatesUbuntuConfigurationTask(ConfigurationTask):
         self.notifications.info("Sharing Certificates for the users.")
 
         self.notifications.info("Reading certificates configuration.")
-        read_certificates_result = self.file_system.read_text("/etc/ssl/certs/internal.crt")
+        read_certificates_result = self.file_system.read_text("/etc/ssl/internal-pki/ca.crt")
         if not read_certificates_result.success or read_certificates_result.data is None:
             self.notifications.error("Reading certificates configuration failed.")
             return read_certificates_result.as_fail()

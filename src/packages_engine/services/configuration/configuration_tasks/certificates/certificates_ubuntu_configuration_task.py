@@ -24,25 +24,6 @@ class CertificatesUbuntuConfigurationTask(ConfigurationTask):
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
         self.notifications.info("Configuring certificates if needed")
-        process_result = self._process_paths(
-            [
-                "/etc/ssl/internal-pki",
-                "/etc/ssl/internal-pki/san.cnf",
-                f"/etc/ssl/internal-pki/{data.domain_name}.key",
-                f"/etc/ssl/internal-pki/{data.domain_name}.csr",
-                f"/etc/ssl/internal-pki/{data.domain_name}.crt",
-                "/etc/ssl/certs/internal.crt",
-                "/etc/ssl/private/internal.key",
-            ]
-        )
-
-        if not process_result.success or process_result.data is None:
-            return process_result.as_fail()
-
-        if process_result.data is True:
-            self.notifications.success("\tPKI configured already. Nothing needs to be done.")
-            return OperationResult[bool].succeed(True)
-
         self.notifications.info("Reading SSL configuration template.")
         ssl_read_result = self.reader.read(
             ConfigurationContent.RAW_STRING,
@@ -54,60 +35,51 @@ class CertificatesUbuntuConfigurationTask(ConfigurationTask):
             return ssl_read_result.as_fail()
         self.notifications.success("\tSSL Configuration template read successfull.")
 
-        self.notifications.info("Saving SSL configuration.")
+        self.notifications.info("Ensuring PKI folders and permissions.")
+        cmds = [
+            "sudo install -d -m 0700 -o root -g root /etc/ssl/internal-pki",
+            "sudo install -d -m 0755 -o root -g root /etc/ssl/certs",
+            "sudo install -d -m 0700 -o root -g root /etc/ssl/private",
+        ]
+        res = self.controller.run_raw_commands(cmds)
+        if not res.success:
+            return res.as_fail()
+
+        # Always (re)write SAN template (safe)
         write_result = self.file_system.write_text(
             "/etc/ssl/internal-pki/san.cnf", ssl_read_result.data
         )
         if not write_result.success:
-            self.notifications.error("\tSaving SSL configuration failed.")
             return write_result.as_fail()
-        self.notifications.success("\tSSL Configuration saved successfully.")
 
-        self.notifications.info("Running commands to create private and public keys if needed.")
-        run_result = self.controller.run_raw_commands(
+        domain = data.domain_name
+        pki = "/etc/ssl/internal-pki"
+
+        self.notifications.info("Creating CA if missing (idempotent).")
+        res = self.controller.run_raw_commands(
             [
-                "mkdir -p /etc/ssl/internal-pki",
-                "mkdir -p /etc/ssl/certs",
-                "mkdir -p /etc/ssl/private",
-                "cd /etc/ssl/internal-pki && sudo openssl genrsa -out ca.key 4096",
-                'cd /etc/ssl/internal-pki && sudo openssl req -x509 -new -sha256 -days 3650 -key ca.key -subj "/CN=Internal VPN CA" -out ca.crt',
-                f"cd /etc/ssl/internal-pki && sudo openssl genrsa -out {data.domain_name}.key 2048",
-                f"cd /etc/ssl/internal-pki && sudo openssl req -new -key {data.domain_name}.key -out {data.domain_name}.csr -config san.cnf",
-                f"cd /etc/ssl/internal-pki && sudo openssl x509 -req -in {data.domain_name}.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out {data.domain_name}.crt -days 825 -sha256 -extensions req_ext -extfile san.cnf",
-                f"sudo cp /etc/ssl/internal-pki/{data.domain_name}.crt /etc/ssl/certs/internal.crt",
-                f"sudo cp /etc/ssl/internal-pki/{data.domain_name}.key /etc/ssl/private/internal.key",
-                "sudo chown root:root /etc/ssl/certs/internal.crt /etc/ssl/private/internal.key",
-                "sudo chmod 644 /etc/ssl/certs/internal.crt",
-                "sudo chmod 600 /etc/ssl/private/internal.key",
+                f"test -f {pki}/ca.key || (umask 077 && openssl genrsa -out {pki}/ca.key 4096)",
+                f'test -f {pki}/ca.crt || openssl req -x509 -new -sha256 -days 3650 -key {pki}/ca.key -subj "/CN=Internal VPN CA" -out {pki}/ca.crt',
+                f"sudo chmod 600 {pki}/ca.key",
+            ]
+        )
+        if not res.success:
+            return res.as_fail()
+
+        self.notifications.info("Creating server key/cert if missing (idempotent).")
+        res = self.controller.run_raw_commands(
+            [
+                f"test -f {pki}/{domain}.key || (umask 077 && openssl genrsa -out {pki}/{domain}.key 2048)",
+                f"test -f {pki}/{domain}.csr || openssl req -new -key {pki}/{domain}.key -out {pki}/{domain}.csr -config {pki}/san.cnf",
+                f"test -f {pki}/{domain}.crt || openssl x509 -req -in {pki}/{domain}.csr -CA {pki}/ca.crt -CAkey {pki}/ca.key -CAcreateserial -out {pki}/{domain}.crt -days 825 -sha256 -extensions req_ext -extfile {pki}/san.cnf",
+                f"sudo install -m 0644 -o root -g root {pki}/{domain}.crt /etc/ssl/certs/internal.crt",
+                f"sudo install -m 0600 -o root -g root {pki}/{domain}.key /etc/ssl/private/internal.key",
             ]
         )
 
-        if not run_result.success:
-            self.notifications.error("\tCommands failed.")
-            return run_result.as_fail()
-        self.notifications.success("\tCommands succeeded.")
+        if not res.success:
+            return res.as_fail()
+
+        self.notifications.success("\tCertificates ready.")
 
         return OperationResult[bool].succeed(True)
-
-    def _process_paths(self, paths: list[str]) -> OperationResult[bool]:
-        config_created = True
-        self.notifications.info("Checking if PKI is configured")
-        for path in paths:
-            if not self.file_system.path_exists(path):
-                config_created = False
-                break
-
-        if not config_created:
-            self.notifications.info("\tPKI is not configured. Will remove unnecessary files")
-            for path in paths:
-                if self.file_system.path_exists(path):
-                    self.notifications.info(f'\tRemoving "{path}"')
-                    remove_result = self.file_system.remove_location(path)
-                    if not remove_result.success:
-                        self.notifications.error(f'\t\tRemoving "{path}" failed')
-                        return remove_result.as_fail()
-                    self.notifications.success(f'\t\tRemoving "{path}" successful')
-        else:
-            self.notifications.info("\tPKI is configured")
-
-        return OperationResult[bool].succeed(config_created)
