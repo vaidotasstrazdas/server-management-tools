@@ -32,11 +32,6 @@ class WireguardShareUbuntuConfigurationTask(ConfigurationTask):
             return shared_config_result.as_fail()
         self.notifications.success("Reading WireGuard shared configuration successful.")
 
-        # Comment this later when in production.
-        self.notifications.info(
-            f"Below is the configuration for the clients:\n{shared_config_result.data}"
-        )
-
         self.notifications.info("Writing WireGuard shared configuration.")
         write_shared_config_result = self.file_system.write_text(
             f"{data.clients_data_dir}/wg0_shared.conf", shared_config_result.data

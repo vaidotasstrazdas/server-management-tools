@@ -31,9 +31,6 @@ class WireguardUbuntuConfigurationTask(ConfigurationTask):
             return server_config_result.as_fail()
         self.notifications.success("Reading WireGuard configuration successful.")
 
-        # Comment this out later
-        self.notifications.info(f"WireGuard configuration is below:\n{server_config_result.data}")
-
         self.notifications.info("Writing WireGuard configuration.")
         write_server_config_result = self.file_system.write_text(
             "/etc/wireguard/wg0.conf", server_config_result.data
