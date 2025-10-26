@@ -79,7 +79,7 @@ class TestSetupUbuntuInstallerTask(unittest.TestCase):
             [
                 [
                     "sudo DEBIAN_FRONTEND=noninteractive apt-get update",
-                    "sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates curl gnupg lsb-release",
+                    "sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates curl gnupg lsb-release jq",
                 ]
             ],
         )

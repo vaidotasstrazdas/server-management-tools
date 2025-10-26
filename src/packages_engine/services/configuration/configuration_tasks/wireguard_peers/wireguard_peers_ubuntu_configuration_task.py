@@ -67,16 +67,16 @@ class WireguardPeersUbuntuConfigurationTask(ConfigurationTask):
             and self.file_system.path_exists(ip_path)
         ):
             self.notifications.info(
-                f'"{directory}{name}" has WireGuard configuration already. Nothing needs to be done.'
+                f'"{config_entity}" has WireGuard configuration already. Nothing needs to be done.'
             )
             return OperationResult[bool].succeed(True)
 
         self.notifications.info(f'Generating configuration for the "{config_entity}".')
         gen_result = self.controller.run_raw_commands(
             [
-                f"test -f /etc/wireguard/{config_entity}.key || (umask 077 && wg genkey | sudo tee /etc/wireguard/{config_entity}.key >/dev/null)",
-                f"test -f /etc/wireguard/{config_entity}.pub || (sudo cat /etc/wireguard/{config_entity}.key | wg pubkey | sudo tee /etc/wireguard/{config_entity}.pub >/dev/null)",
-                f"sudo chmod 600 /etc/wireguard/{config_entity}.key",
+                f"test -f /etc/wireguard{config_entity}.key || (umask 077 && wg genkey | sudo tee /etc/wireguard{config_entity}.key >/dev/null)",
+                f"test -f /etc/wireguard{config_entity}.pub || (sudo cat /etc/wireguard{config_entity}.key | wg pubkey | sudo tee /etc/wireguard{config_entity}.pub >/dev/null)",
+                f"sudo chmod 600 /etc/wireguard{config_entity}.key",
             ]
         )
 

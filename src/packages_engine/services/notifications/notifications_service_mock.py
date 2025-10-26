@@ -1,5 +1,7 @@
 """Mock Notifications Service - test double for notification operations."""
 
+from typing import Any
+
 from .notification_service_contract import NotificationsServiceContract
 
 
@@ -14,7 +16,7 @@ class MockNotificationsService(NotificationsServiceContract):
         params: List of dictionaries containing notification type and text for each call.
     """
 
-    params: list[object] = []
+    params: list[Any] = []
 
     def __init__(self):
         """Initialize the mock service with an empty tracking list."""
@@ -55,3 +57,11 @@ class MockNotificationsService(NotificationsServiceContract):
             text: The warning message to record.
         """
         self.params.append({"type": "warning", "text": text})
+
+    def find_notifications(self, search_term: str) -> list[Any]:
+        """Find list of notifications relevant to the search criteria."""
+        result: list[Any] = []
+        for param in self.params:
+            if search_term in param["text"]:
+                result.append(param)
+        return result

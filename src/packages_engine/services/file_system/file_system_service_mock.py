@@ -134,3 +134,13 @@ class MockFileSystemService(FileSystemServiceContract):
             return self.copy_path_result_map[copy_sequence]
 
         return self.copy_path_result
+
+    def find_write_text_params(self, path_term: str) -> list[WriteTextParams]:
+        """
+        Fids all params of writing the text based on path search criteria.
+        """
+        result: list[WriteTextParams] = []
+        for params in self.write_text_params:
+            if path_term in params.path_location:
+                result.append(params)
+        return result

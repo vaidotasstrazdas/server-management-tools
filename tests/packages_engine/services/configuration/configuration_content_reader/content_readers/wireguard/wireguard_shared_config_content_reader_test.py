@@ -55,15 +55,15 @@ AllowedIPs = 10.10.0.1/32
 Endpoint = {{REMOTE_IP_ADDRESS}}:51820
 PersistentKeepalive = 25"""
             ),
-            "/etc/wireguard/clients/developer.endpoint": OperationResult[str].succeed("10.10.0.2"),
+            "/etc/wireguard/clients/developer.ip": OperationResult[str].succeed("10.10.0.2"),
             "/etc/wireguard/clients/developer.key": OperationResult[str].succeed(
                 "developer_private_key_value"
             ),
-            "/etc/wireguard/clients/viewer.endpoint": OperationResult[str].succeed("10.10.0.3"),
+            "/etc/wireguard/clients/viewer.ip": OperationResult[str].succeed("10.10.0.3"),
             "/etc/wireguard/clients/viewer.key": OperationResult[str].succeed(
                 "viewer_private_key_value"
             ),
-            "/etc/wireguard/clients/operator.endpoint": OperationResult[str].succeed("10.10.0.4"),
+            "/etc/wireguard/clients/operator.ip": OperationResult[str].succeed("10.10.0.4"),
             "/etc/wireguard/clients/operator.key": OperationResult[str].succeed(
                 "operator_private_key_value"
             ),
@@ -130,7 +130,7 @@ PersistentKeepalive = 25""",
 
     def test_fails_when_client_endpoint_not_read(self):
         """Test that read fails when a client endpoint file cannot be read."""
-        self._failed_path_test("/etc/wireguard/clients/developer.endpoint")
+        self._failed_path_test("/etc/wireguard/clients/developer.ip")
 
     def test_fails_when_client_private_key_not_read(self):
         """Test that read fails when a client private key file cannot be read."""

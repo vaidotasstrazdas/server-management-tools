@@ -55,15 +55,15 @@ ListenPort = 51820"""
 PublicKey = {{CLIENT_PUBLIC_KEY}}
 AllowedIPs = {{CLIENT_IP_ADDRESS}}/32"""
             ),
-            "/etc/wireguard/clients/developer.endpoint": OperationResult[str].succeed("10.10.0.2"),
+            "/etc/wireguard/clients/developer.ip": OperationResult[str].succeed("10.10.0.2"),
             "/etc/wireguard/clients/developer.pub": OperationResult[str].succeed(
                 "developer_public_key_value"
             ),
-            "/etc/wireguard/clients/viewer.endpoint": OperationResult[str].succeed("10.10.0.3"),
+            "/etc/wireguard/clients/viewer.ip": OperationResult[str].succeed("10.10.0.3"),
             "/etc/wireguard/clients/viewer.pub": OperationResult[str].succeed(
                 "viewer_public_key_value"
             ),
-            "/etc/wireguard/clients/operator.endpoint": OperationResult[str].succeed("10.10.0.4"),
+            "/etc/wireguard/clients/operator.ip": OperationResult[str].succeed("10.10.0.4"),
             "/etc/wireguard/clients/operator.pub": OperationResult[str].succeed(
                 "operator_public_key_value"
             ),
@@ -116,7 +116,7 @@ AllowedIPs = 10.10.0.4/32""",
 
     def test_fails_when_client_endpoint_not_read(self):
         """Test that read fails when a client endpoint file cannot be read."""
-        self._failed_path_test("/etc/wireguard/clients/developer.endpoint")
+        self._failed_path_test("/etc/wireguard/clients/developer.ip")
 
     def test_fails_when_client_public_key_not_read(self):
         """Test that read fails when a client public key file cannot be read."""

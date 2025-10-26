@@ -109,6 +109,23 @@ class MockPackageControllerService(PackageControllerServiceContract):
 
         return self.run_raw_commands_result
 
+    def find_first_raw_commands_group(self, term: str) -> list[str] | None:
+        """
+        Find first raw commands group by the term provided.
+
+        Args:
+            term: The search criteria to match against patterns.
+
+        Returns:
+            Matching result if found, None otherwise.
+        """
+        for params in self.run_raw_commands_params:
+            for param in params:
+                if term in param:
+                    return params
+
+        return None
+
     def _find_result(self, command: str) -> OperationResult[bool] | None:
         """
         Find a configured result for a command pattern.
@@ -120,6 +137,6 @@ class MockPackageControllerService(PackageControllerServiceContract):
             Matching result if found, None otherwise.
         """
         for item in self.run_raw_commands_result_regex_map.items():
-            if command in item[0]:
-                return self.run_raw_commands_result_regex_map[item[0]]
+            if item[0] in command:
+                return item[1]
         return None
