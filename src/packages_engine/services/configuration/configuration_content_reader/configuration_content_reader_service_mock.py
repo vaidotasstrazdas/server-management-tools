@@ -1,7 +1,7 @@
 """Mock Configuration Content Reader Service - test double for configuration content reading operations."""
 
 from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Callable, Dict, Optional
 
 from packages_engine.models import OperationResult
 from packages_engine.models.configuration import ConfigurationContent, ConfigurationData
@@ -45,6 +45,7 @@ class MockConfigurationContentReaderService(ConfigurationContentReaderServiceCon
         self.read_result_fn: Optional[
             Callable[[ConfigurationContent, ConfigurationData, Optional[str]], OperationResult[str]]
         ] = None
+        self.read_result_map: Dict[str, OperationResult[str]] = {}
 
     def read(
         self,
@@ -67,5 +68,8 @@ class MockConfigurationContentReaderService(ConfigurationContentReaderServiceCon
 
         if self.read_result_fn is not None:
             return self.read_result_fn(content, config, template_path)
+
+        if template_path in self.read_result_map:
+            return self.read_result_map[template_path]
 
         return self.read_result

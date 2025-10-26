@@ -43,14 +43,19 @@ class CertificatesUbuntuConfigurationTask(ConfigurationTask):
         ]
         res = self.controller.run_raw_commands(cmds)
         if not res.success:
+            self.notifications.error("Ensuring PKI folders and permissions failed.")
             return res.as_fail()
+        self.notifications.success("Ensuring PKI folders and permissions succeeded.")
 
         # Always (re)write SAN template (safe)
+        self.notifications.info("(Re)writing SAN template.")
         write_result = self.file_system.write_text(
             "/etc/ssl/internal-pki/san.cnf", ssl_read_result.data
         )
         if not write_result.success:
+            self.notifications.error("(Re)writing SAN template failed.")
             return write_result.as_fail()
+        self.notifications.success("(Re)writing SAN template successful.")
 
         domain = data.domain_name
         pki = "/etc/ssl/internal-pki"
@@ -64,7 +69,9 @@ class CertificatesUbuntuConfigurationTask(ConfigurationTask):
             ]
         )
         if not res.success:
+            self.notifications.error("Creating CA failed.")
             return res.as_fail()
+        self.notifications.success("Creating CA succeeded.")
 
         self.notifications.info("Creating server key/cert if missing (idempotent).")
         res = self.controller.run_raw_commands(
@@ -78,7 +85,9 @@ class CertificatesUbuntuConfigurationTask(ConfigurationTask):
         )
 
         if not res.success:
+            self.notifications.error("Creating server key/cert failed.")
             return res.as_fail()
+        self.notifications.success("Creating server key/cert succeeded.")
 
         self.notifications.success("\tCertificates ready.")
 
