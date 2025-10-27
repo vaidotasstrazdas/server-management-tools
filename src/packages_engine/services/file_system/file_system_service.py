@@ -146,9 +146,21 @@ class FileSystemService(FileSystemServiceContract):
             if not remove_result.success:
                 return remove_result.as_fail()
 
-        execute_raw_command_result = self.system_management_service.execute_raw_command(
-            f"sudo mkdir -p {location_to} && sudo cp -a {location_from} {location_to}"
-        )
+        path_from = self._get_path(location_from)
+        location_to_dir = location_to
+        if path_from.is_file():
+            location_to_dir_parts = location_to_dir.split("/")
+            location_to_dir_parts.pop()
+            location_to_dir = str.join("/", location_to_dir_parts)
+
+        if location_to_dir != "":
+            execute_raw_command_result = self.system_management_service.execute_raw_command(
+                f"sudo mkdir -p {location_to_dir} && sudo cp -a {location_from} {location_to}"
+            )
+        else:
+            execute_raw_command_result = self.system_management_service.execute_raw_command(
+                f"sudo cp -a {location_from} {location_to}"
+            )
 
         if not execute_raw_command_result.success:
             return execute_raw_command_result.as_fail()

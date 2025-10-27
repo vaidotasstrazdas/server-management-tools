@@ -1,19 +1,20 @@
 from packages_engine.commands import AutostartCommand
+from packages_engine.services.notifications import NotificationsService
 from packages_engine.services.package_controller import PackageControllerService
 from packages_engine.services.system_management import SystemManagementService
-from packages_engine.services.notifications import NotificationsService
-from packages_engine.services.system_management_engine_locator import SystemManagementEngineLocatorService
+from packages_engine.services.system_management_engine_locator import (
+    SystemManagementEngineLocatorService,
+)
 
 
 def main():
-    systemManagementEngineLocatorService = SystemManagementEngineLocatorService()
-    engine = systemManagementEngineLocatorService.locate_engine()
-    systemManagementService = SystemManagementService(engine)
+    system_management_engine_locator_service = SystemManagementEngineLocatorService()
+    engine = system_management_engine_locator_service.locate_engine()
+    system_management_service = SystemManagementService(engine)
 
-    notificationsService = NotificationsService()
+    notifications_service = NotificationsService()
 
-    controller = PackageControllerService(
-        systemManagementService, notificationsService)
+    controller = PackageControllerService(system_management_service, notifications_service)
 
     command = AutostartCommand(controller)
 

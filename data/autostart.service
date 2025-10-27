@@ -1,14 +1,19 @@
 [Unit]
-Description=Autostart Python Service
-After=network.target docker.service
+Description=Internal Stack Autostart
+ConditionPathExists=/usr/local/sbin/autostart.pyz
+Wants=network-online.target wg-quick@wg0.service docker.service dnsmasq.service nftables.service systemd-resolved.service nginx.service
+After=network-online.target wg-quick@wg0.service docker.service dnsmasq.service nftables.service systemd-resolved.service nginx.service
 
 [Service]
-Type=simple
-ExecStart=/usr/bin/python3 /usr/local/sbin/autostart.pyz
-Restart=always
-User=bool
-WorkingDirectory=/usr/local/sbin/autostart.pyz
+Type=oneshot
+# Run the packaged zipapp directly with python (shebang not required)
+ExecStart=/usr/bin/python3 -u /usr/local/sbin/autostart.pyz
+User=root
+WorkingDirectory=/usr/local/sbin
 Environment=PYTHONUNBUFFERED=1
+# Make sure docker etc. are resolvable even under systemd's minimal PATH
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target

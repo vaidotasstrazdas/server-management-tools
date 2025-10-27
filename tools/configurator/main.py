@@ -190,6 +190,7 @@ def main():
             certificates,
             share_certificates,
             nginx,
+            autostart,
         ],
     )
     command.execute()

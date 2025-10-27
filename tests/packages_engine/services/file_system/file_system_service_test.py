@@ -1,4 +1,5 @@
 # pylint: disable=too-many-lines
+# pylint: disable=too-many-arguments
 """
 Unit tests for the FileSystemService class.
 
@@ -1156,7 +1157,7 @@ class TestFileSystemService(unittest.TestCase):
         """Test copy_path removes existing destination file before copying."""
         # Arrange
         mock_is_dir.side_effect = [False]
-        mock_is_file.side_effect = [True]
+        mock_is_file.side_effect = [True, True]
         mock_exists.side_effect = [True, True, True]
         mock_as_posix.side_effect = ["/path-location/to"]
 
@@ -1183,7 +1184,7 @@ class TestFileSystemService(unittest.TestCase):
         """Test copy_path removes existing destination directory before copying."""
         # Arrange
         mock_is_dir.side_effect = [True]
-        mock_is_file.side_effect = [False]
+        mock_is_file.side_effect = [False, False]
         mock_exists.side_effect = [True, True, True]
         mock_as_posix.side_effect = ["/path-location/to"]
 
@@ -1210,7 +1211,7 @@ class TestFileSystemService(unittest.TestCase):
         """Test copy_path succeeds after removing existing destination."""
         # Arrange
         mock_is_dir.side_effect = [True]
-        mock_is_file.side_effect = [False]
+        mock_is_file.side_effect = [False, False]
         mock_exists.side_effect = [True, True, True]
         mock_as_posix.side_effect = ["/path-location/to"]
 
@@ -1276,3 +1277,160 @@ class TestFileSystemService(unittest.TestCase):
 
         # Assert
         self.assertEqual(result, fail_result)
+
+    @patch(f"{PACKAGE_NAME}.Path.as_posix")
+    @patch(f"{PACKAGE_NAME}.Path.exists")
+    @patch(f"{PACKAGE_NAME}.Path.is_file")
+    @patch(f"{PACKAGE_NAME}.Path.is_dir")
+    def test_copy_path_executes_correct_command_to_create_path_on_file_case_1(
+        self,
+        mock_is_dir: MagicMock,
+        mock_is_file: MagicMock,
+        mock_exists: MagicMock,
+        mock_as_posix: MagicMock,
+    ):
+        """Test copy_path command on file copy (case 1)."""
+        self._copy_file_test(
+            mock_is_dir,
+            mock_is_file,
+            mock_exists,
+            mock_as_posix,
+            "a/b/c",
+            "e/d/f",
+            "sudo mkdir -p e/d && sudo cp -a a/b/c e/d/f",
+        )
+
+    @patch(f"{PACKAGE_NAME}.Path.as_posix")
+    @patch(f"{PACKAGE_NAME}.Path.exists")
+    @patch(f"{PACKAGE_NAME}.Path.is_file")
+    @patch(f"{PACKAGE_NAME}.Path.is_dir")
+    def test_copy_path_executes_correct_command_to_create_path_on_file_case_2(
+        self,
+        mock_is_dir: MagicMock,
+        mock_is_file: MagicMock,
+        mock_exists: MagicMock,
+        mock_as_posix: MagicMock,
+    ):
+        """Test copy_path command on file copy (case 2)."""
+        self._copy_file_test(
+            mock_is_dir,
+            mock_is_file,
+            mock_exists,
+            mock_as_posix,
+            "a/b/c/e.txt",
+            "e.txt",
+            "sudo cp -a a/b/c/e.txt e.txt",
+        )
+
+    @patch(f"{PACKAGE_NAME}.Path.as_posix")
+    @patch(f"{PACKAGE_NAME}.Path.exists")
+    @patch(f"{PACKAGE_NAME}.Path.is_file")
+    @patch(f"{PACKAGE_NAME}.Path.is_dir")
+    def test_copy_path_executes_correct_command_to_create_path_on_file_case_3(
+        self,
+        mock_is_dir: MagicMock,
+        mock_is_file: MagicMock,
+        mock_exists: MagicMock,
+        mock_as_posix: MagicMock,
+    ):
+        """Test copy_path command on file copy (case 3)."""
+        self._copy_file_test(
+            mock_is_dir,
+            mock_is_file,
+            mock_exists,
+            mock_as_posix,
+            "a/b/c/e.txt",
+            "/e.txt",
+            "sudo cp -a a/b/c/e.txt /e.txt",
+        )
+
+    @patch(f"{PACKAGE_NAME}.Path.as_posix")
+    @patch(f"{PACKAGE_NAME}.Path.exists")
+    @patch(f"{PACKAGE_NAME}.Path.is_file")
+    @patch(f"{PACKAGE_NAME}.Path.is_dir")
+    def test_copy_path_executes_correct_command_to_create_path_on_file_case_4(
+        self,
+        mock_is_dir: MagicMock,
+        mock_is_file: MagicMock,
+        mock_exists: MagicMock,
+        mock_as_posix: MagicMock,
+    ):
+        """Test copy_path command on file copy (case 4)."""
+        self._copy_file_test(
+            mock_is_dir,
+            mock_is_file,
+            mock_exists,
+            mock_as_posix,
+            "a/b/c/e.txt",
+            "f/e.txt",
+            "sudo mkdir -p f && sudo cp -a a/b/c/e.txt f/e.txt",
+        )
+
+    @patch(f"{PACKAGE_NAME}.Path.as_posix")
+    @patch(f"{PACKAGE_NAME}.Path.exists")
+    @patch(f"{PACKAGE_NAME}.Path.is_file")
+    @patch(f"{PACKAGE_NAME}.Path.is_dir")
+    def test_copy_path_executes_correct_command_to_create_path_on_file_case_5(
+        self,
+        mock_is_dir: MagicMock,
+        mock_is_file: MagicMock,
+        mock_exists: MagicMock,
+        mock_as_posix: MagicMock,
+    ):
+        """Test copy_path command on file copy (case 5)."""
+        self._copy_file_test(
+            mock_is_dir,
+            mock_is_file,
+            mock_exists,
+            mock_as_posix,
+            "a/b/c/e.txt",
+            "f/g/e.txt",
+            "sudo mkdir -p f/g && sudo cp -a a/b/c/e.txt f/g/e.txt",
+        )
+
+    @patch(f"{PACKAGE_NAME}.Path.as_posix")
+    @patch(f"{PACKAGE_NAME}.Path.exists")
+    @patch(f"{PACKAGE_NAME}.Path.is_file")
+    @patch(f"{PACKAGE_NAME}.Path.is_dir")
+    def test_copy_path_executes_correct_command_to_create_path_on_file_case_6(
+        self,
+        mock_is_dir: MagicMock,
+        mock_is_file: MagicMock,
+        mock_exists: MagicMock,
+        mock_as_posix: MagicMock,
+    ):
+        """Test copy_path command on file copy (case 6)."""
+        self._copy_file_test(
+            mock_is_dir,
+            mock_is_file,
+            mock_exists,
+            mock_as_posix,
+            "a/b/c/e.txt",
+            "/f/g/e.txt",
+            "sudo mkdir -p /f/g && sudo cp -a a/b/c/e.txt /f/g/e.txt",
+        )
+
+    def _copy_file_test(
+        self,
+        mock_is_dir: MagicMock,
+        mock_is_file: MagicMock,
+        mock_exists: MagicMock,
+        mock_as_posix: MagicMock,
+        location_from: str,
+        location_to: str,
+        expected_command: str,
+    ):
+        # Arrange
+        mock_is_dir.side_effect = [True]
+        mock_is_file.side_effect = [True, True]
+        mock_exists.side_effect = [True, True, True]
+        mock_as_posix.side_effect = ["/path-location/to"]
+
+        # Act
+        self.service.copy_path(location_from, location_to)
+
+        # Assert
+        self.assertEqual(
+            self.mock_system_management_service.execute_raw_command_params,
+            [expected_command],
+        )
