@@ -46,9 +46,7 @@ class SelfDeployCommand:
         return True
 
     def _copy_paths(self, paths_from: list[str], paths_to: list[str]):
-        for i in range(0, len(paths_from)):
-            path_from = paths_from[i]
-            path_to = paths_to[i]
+        for path_from, path_to in zip(paths_from, paths_to):
             self.notifications.info(f'Copying from "{path_from}" to "{path_to}"')
             copy_result = self.file_system.copy_path(path_from, path_to)
             if not copy_result.success:
