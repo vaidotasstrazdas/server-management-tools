@@ -31,6 +31,14 @@ from packages_engine.services.configuration.configuration_tasks.docker_resources
     DockerResourcesUbuntuConfigurationTask,
     DockerResourcesWindowsConfigurationTask,
 )
+from packages_engine.services.configuration.configuration_tasks.docker_seed_gitea import (
+    DockerSeedGiteaUbuntuConfigurationTask,
+    DockerSeedGiteaWindowsConfigurationTask,
+)
+from packages_engine.services.configuration.configuration_tasks.docker_setup_gitea_admin import (
+    DockerSetupGiteaAdminUbuntuConfigurationTask,
+    DockerSetupGiteaAdminWindowsConfigurationTask,
+)
 from packages_engine.services.configuration.configuration_tasks.nftables import (
     NftablesUbuntuConfigurationTask,
     NftablesWindowsConfigurationTask,
@@ -141,11 +149,25 @@ def main():
         DockerResourcesWindowsConfigurationTask(),
     )
 
+    docker_seed_gitea = GenericConfigurationTask(
+        DockerSeedGiteaUbuntuConfigurationTask(
+            content_reader, file_system, notifications_service, controller
+        ),
+        DockerSeedGiteaWindowsConfigurationTask(),
+    )
+
     docker_orchestration = GenericConfigurationTask(
         DockerOrchestrationUbuntuConfigurationTask(
             content_reader, file_system, notifications_service, controller
         ),
         DockerOrchestrationWindowsConfigurationTask(),
+    )
+
+    docker_setup_gitea_admin = GenericConfigurationTask(
+        DockerSetupGiteaAdminUbuntuConfigurationTask(
+            content_reader, file_system, notifications_service, controller
+        ),
+        DockerSetupGiteaAdminWindowsConfigurationTask(),
     )
 
     certificates = GenericConfigurationTask(
@@ -186,7 +208,9 @@ def main():
             wireguard_share,
             systemd,
             docker_resources,
+            docker_seed_gitea,
             docker_orchestration,
+            docker_setup_gitea_admin,
             certificates,
             share_certificates,
             nginx,

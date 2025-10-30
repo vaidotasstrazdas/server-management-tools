@@ -28,6 +28,10 @@ When configuring the server (i.e., using ./configure.pyz command), you will be a
 | GITEA_DB_NAME     | Database name for the PostgreSQL database that is going to be used by Gitea.          | gitea                  |
 | GITEA_DB_USER     | Database user for the PostgreSQL database that is going to be used by Gitea.          | gitea                  |
 | GITEA_DB_PASSWORD | Database user password for the PostgreSQL database that is going to be used by Gitea. | 123456                 |
+| GITEA_ADMIN_LOGIN | Gitea admin user name.                                                                | admin                  |
+| GITEA_ADMIN_EMAIL | Gitea admin user email.                                                               | admin@example.com      |
+| GITEA_DB_PASSWORD | Gitea admin user password.                                                            | 123456                 |
+| GITEA_SECRET_KEY  | Gitea secret key.                                                                     | secret-key             |
 
 ## PostgreSQL
 
