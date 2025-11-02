@@ -27,17 +27,10 @@ class DockerSetupGiteaAdminUbuntuConfigurationTask(ConfigurationTask):
 
         cmds_admin: list[str] = []
 
-        # If no password provided in data, generate and store securely once:
         cmds_admin.append(
             "sudo bash -lc '"
             f"if ! docker exec gitea gitea admin user list --admin 2>/dev/null | grep -qw {data.gitea_admin_login}; then "
-            f"  PW={data.gitea_admin_password}; "
-            '  if [ -z "$PW" ]; then '
-            '    PW=$(openssl rand -base64 24 | tr -d "\\n"); '
-            f'    echo "$PW" | sudo tee /root/.gitea-{data.gitea_admin_login}.pwd >/dev/null; '
-            "    sudo chmod 0600 /root/.gitea-*.pwd; "
-            "  fi; "
-            f'  docker exec gitea gitea admin user create --admin --username {data.gitea_admin_login} --password "$PW" --email {data.gitea_admin_email} --must-change-password=false; '
+            f"  docker exec gitea gitea admin user create --admin --username {data.gitea_admin_login} --password {data.gitea_admin_password} --email {data.gitea_admin_email} --must-change-password=false; "
             "fi'"
         )
 

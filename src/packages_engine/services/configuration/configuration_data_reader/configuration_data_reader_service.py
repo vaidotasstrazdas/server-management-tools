@@ -34,6 +34,12 @@ class ConfigurationDataReaderService(ConfigurationDataReaderServiceContract):
         data.gitea_db_name = self.input_collection.read_str("Gitea database name", "gitea")
         data.gitea_db_user = self.input_collection.read_str("Gitea database user", "gitea")
         data.gitea_db_password = self.input_collection.read_str("Gitea database password", "123456")
+        data.gitea_admin_login = self.input_collection.read_str("Gitea Admin User Name", "admin")
+        data.gitea_admin_email = self.input_collection.read_str(
+            "Gitea Admin User Email", "admin@example.com"
+        )
+        data.gitea_admin_password = self.input_collection.read_str("Gitea Admin Password", "123456")
+        data.gitea_secret_key = self.input_collection.read_str("Gitea Secret Key", "secret-key")
         data.pg_admin_email = self.input_collection.read_str(
             "PostgreSQL Admin Email", "user@example.com"
         )
