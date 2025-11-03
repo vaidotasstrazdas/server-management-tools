@@ -1,3 +1,5 @@
+"""Tests for WireguardUbuntuConfigurationTask. Verifies WireGuard VPN configuration on Ubuntu."""
+
 import unittest
 
 from packages_engine.models import OperationResult
@@ -22,6 +24,8 @@ from packages_engine.services.package_controller.package_controller_service_mock
 
 
 class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
+    """Test suite for WireguardUbuntuConfigurationTask. Tests WireGuard server configuration and wg0 interface setup."""
+
     reader: MockConfigurationContentReaderService
     file_system: MockFileSystemService
     notifications: MockNotificationsService
@@ -49,6 +53,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.maxDiff = None
 
     def test_happy_path(self):
+        """Verifies successful WireGuard configuration completes without errors."""
         # Act
         result = self.task.configure(self.data)
 
@@ -56,6 +61,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, OperationResult[bool].succeed(True))
 
     def test_happy_path_produces_correct_notifications_flow(self):
+        """Verifies correct notification sequence during successful configuration."""
         # Act
         self.task.configure(self.data)
 
@@ -79,6 +85,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_executes_configuration_commands(self):
+        """Verifies correct shell commands are executed for WireGuard setup."""
         # Act
         self.task.configure(self.data)
 
@@ -95,6 +102,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_configure_results_in_failure(self):
+        """Verifies failure when configuration commands cannot be executed."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result = fail_result
@@ -106,6 +114,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_failure_to_protect_wireguard_config_results_in_failure(self):
+        """Verifies failure when config file permissions cannot be set."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map[
@@ -119,6 +128,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_failure_to_protect_wireguard_config_results_in_correct_notifications(self):
+        """Verifies correct error notifications when chmod fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map[
@@ -146,6 +156,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_restart_wireguard_config_results_in_failure(self):
+        """Verifies failure when WireGuard service cannot be started."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map["sudo bash"] = fail_result
@@ -157,6 +168,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_failure_to_restart_wireguard_config_results_in_correct_notifications(self):
+        """Verifies correct error notifications when wg0 service start fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map["sudo bash"] = fail_result
@@ -184,6 +196,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_reads_correct_wireguard_configurations(self):
+        """Verifies WireGuard server config is read from correct source."""
         # Act
         self.task.configure(self.data)
 
@@ -196,6 +209,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_read_wireguard_server_configuration_results_in_failure(self):
+        """Verifies failure when server config cannot be read."""
         # Arrange
         fail_result = OperationResult[str].fail("wireguard-server-config-read-failure")
         self.reader.read_result = fail_result
@@ -207,6 +221,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_failure_to_read_wireguard_server_configuration_results_in_correct_notifications(self):
+        """Verifies correct error notifications when config read fails."""
         # Arrange
         fail_result = OperationResult[str].fail("wireguard-server-config-read-failure")
         self.reader.read_result = fail_result
@@ -225,6 +240,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_save_wireguard_server_config_results_in_failure(self):
+        """Verifies failure when server config file cannot be written."""
         # Arrange
         fail_result = OperationResult[bool].fail("Massive fail")
         self.file_system.write_text_result_map = {
@@ -238,6 +254,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_failure_to_save_wireguard_server_config_results_in_correct_notifications(self):
+        """Verifies correct error notifications when config write fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Massive fail")
         self.file_system.write_text_result_map = {
@@ -260,6 +277,7 @@ class TestWireguardUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_stores_server_config_correctly(self):
+        """Verifies server config is written to correct file path."""
         # Act
         self.task.configure(self.data)
 

@@ -1,3 +1,5 @@
+"""Tests for SystemdUbuntuConfigurationTask. Verifies systemd-resolved split DNS configuration on Ubuntu."""
+
 import unittest
 
 from packages_engine.models import OperationResult
@@ -22,6 +24,8 @@ from packages_engine.services.package_controller.package_controller_service_mock
 
 
 class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
+    """Test suite for SystemdUbuntuConfigurationTask. Tests split DNS configuration and systemd-resolved restart."""
+
     reader: MockConfigurationContentReaderService
     file_system: MockFileSystemService
     notifications: MockNotificationsService
@@ -50,6 +54,7 @@ class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
         self.maxDiff = None
 
     def test_happy_path(self):
+        """Verifies successful systemd configuration completes without errors."""
         # Act
         result = self.task.configure(self.data)
 
@@ -57,6 +62,7 @@ class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, OperationResult[bool].succeed(True))
 
     def test_happy_path_produces_correct_notifications_flow(self):
+        """Verifies correct notification sequence during successful configuration."""
         # Act
         self.task.configure(self.data)
 
@@ -83,6 +89,7 @@ class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_reads_split_dns_config_template_correctly(self):
+        """Verifies split DNS config template is read from correct path."""
         # Act
         self.task.configure(self.data)
 
@@ -99,6 +106,7 @@ class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_read_split_dns_config_template_results_in_failure(self):
+        """Verifies failure when split DNS config template cannot be read."""
         # Arrange
         failure_result = OperationResult[str].fail("Failure")
         self.reader.read_result = failure_result
@@ -110,6 +118,7 @@ class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_failure_to_read_split_dns_config_template_results_in_correct_notifications_flow(self):
+        """Verifies correct error notifications when config read fails."""
         # Arrange
         failure_result = OperationResult[str].fail("Failure")
         self.reader.read_result = failure_result
@@ -128,6 +137,7 @@ class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_installs_split_dns_config(self):
+        """Verifies resolved.conf.d directory is created with correct permissions."""
         # Act
         self.task.configure(self.data)
 
@@ -137,6 +147,7 @@ class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(group, [command])
 
     def test_failure_to_install_split_dns_config_results_in_failure(self):
+        """Verifies failure when config directory cannot be created."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         command = "sudo install -d -m 0755 /etc/systemd/resolved.conf.d"
@@ -149,6 +160,7 @@ class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_failure_to_install_split_dns_config_results_in_failure_notifications_flow(self):
+        """Verifies correct error notifications when directory creation fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         command = "sudo install -d -m 0755 /etc/systemd/resolved.conf.d"
@@ -170,6 +182,7 @@ class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_configures_split_dns_config_permissions(self):
+        """Verifies config file ownership and permissions are set correctly."""
         # Act
         self.task.configure(self.data)
 
@@ -186,6 +199,7 @@ class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_configure_split_dns_config_permissions_results_in_failure(self):
+        """Verifies failure when file permissions cannot be set."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         command = "sudo chown root:root"
@@ -200,6 +214,7 @@ class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
     def test_failure_to_configure_split_dns_config_permissions_results_in_failure_notifications_flow(
         self,
     ):
+        """Verifies correct error notifications when permission setting fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         command = "sudo chown root:root"
@@ -231,6 +246,7 @@ class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_writes_dns_split_config(self):
+        """Verifies split DNS config is written to correct file path."""
         # Act
         self.task.configure(self.data)
 
@@ -245,6 +261,7 @@ class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_writing_dns_split_config_failure_results_in_fail(self):
+        """Verifies failure when config file cannot be written."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result_map[
@@ -258,6 +275,7 @@ class TestSystemdUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_writing_dns_split_config_failure_results_in_fail_notifications_flow(self):
+        """Verifies correct error notifications when config write fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result_map[

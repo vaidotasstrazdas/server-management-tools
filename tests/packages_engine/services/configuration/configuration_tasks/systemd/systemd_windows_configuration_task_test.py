@@ -1,3 +1,5 @@
+"""Tests for SystemdWindowsConfigurationTask. Verifies unsupported platform handling."""
+
 import unittest
 
 from packages_engine.models import OperationResult
@@ -8,6 +10,8 @@ from packages_engine.services.configuration.configuration_tasks.systemd import (
 
 
 class TestSystemdWindowsConfigurationTask(unittest.TestCase):
+    """Test suite for SystemdWindowsConfigurationTask. Tests Windows platform rejection."""
+
     task: SystemdWindowsConfigurationTask
     data: ConfigurationData
 
@@ -16,6 +20,7 @@ class TestSystemdWindowsConfigurationTask(unittest.TestCase):
         self.data = ConfigurationData.default()
 
     def test_returns_unsupported_error(self):
+        """Verifies task returns unsupported error on Windows platform."""
         # Act
         result = self.task.configure(self.data)
 

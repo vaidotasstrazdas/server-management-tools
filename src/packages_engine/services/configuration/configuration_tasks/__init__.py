@@ -1,3 +1,9 @@
+"""Configuration tasks for system setup and management.
+
+Provides configuration tasks for various services like DNS, web servers,
+VPN, Docker orchestration, and system services.
+"""
+
 from .configuration_task import ConfigurationTask
 from .dnsmasq import *
 from .docker_orchestration import *

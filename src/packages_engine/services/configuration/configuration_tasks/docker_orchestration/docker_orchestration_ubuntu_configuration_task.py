@@ -1,3 +1,8 @@
+"""Ubuntu Docker orchestration configuration.
+
+Orchestrates Docker networks, DNS settings, and container deployments.
+"""
+
 from packages_engine.models import OperationResult
 from packages_engine.models.configuration import ConfigurationData
 from packages_engine.services.configuration.configuration_content_reader import (
@@ -10,6 +15,12 @@ from packages_engine.services.package_controller import PackageControllerService
 
 
 class DockerOrchestrationUbuntuConfigurationTask(ConfigurationTask):
+    """Orchestrates Docker container deployment on Ubuntu.
+
+    Manages Docker networks, daemon DNS configuration, systemd dependencies,
+    and docker-compose deployment with health checks.
+    """
+
     def __init__(
         self,
         reader: ConfigurationContentReaderServiceContract,
@@ -17,12 +28,31 @@ class DockerOrchestrationUbuntuConfigurationTask(ConfigurationTask):
         notifications: NotificationsServiceContract,
         controller: PackageControllerServiceContract,
     ):
+        """Initialize Docker orchestration task.
+
+        Args:
+            reader: Service for reading configurations.
+            file_system: Service for file operations.
+            notifications: Service for user notifications.
+            controller: Service for executing system commands.
+        """
         self.reader = reader
         self.file_system = file_system
         self.notifications = notifications
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        """Orchestrate Docker containers and network setup.
+
+        Creates Docker network, configures DNS, sets up systemd dependencies,
+        deploys compose stack, and waits for services to be healthy.
+
+        Args:
+            data: Configuration data including domain name.
+
+        Returns:
+            OperationResult[bool]: Success if orchestration completes.
+        """
         self.notifications.info("Orchestrating Docker containers.")
         cmds = [
             # network (only create if missing)

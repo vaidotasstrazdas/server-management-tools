@@ -1,3 +1,5 @@
+"""Generate and configure internal PKI certificates on Ubuntu."""
+
 from packages_engine.models import OperationResult
 from packages_engine.models.configuration import ConfigurationContent, ConfigurationData
 from packages_engine.services.configuration.configuration_content_reader import (
@@ -10,6 +12,8 @@ from packages_engine.services.package_controller import PackageControllerService
 
 
 class CertificatesUbuntuConfigurationTask(ConfigurationTask):
+    """Creates internal CA and server certificates for secure services."""
+
     def __init__(
         self,
         reader: ConfigurationContentReaderServiceContract,
@@ -17,12 +21,28 @@ class CertificatesUbuntuConfigurationTask(ConfigurationTask):
         notifications: NotificationsServiceContract,
         controller: PackageControllerServiceContract,
     ):
+        """Initialize the certificates configuration task.
+
+        Args:
+            reader: Service for reading configuration content
+            file_system: Service for file system operations
+            notifications: Service for user notifications
+            controller: Service for executing system commands
+        """
         self.reader = reader
         self.file_system = file_system
         self.notifications = notifications
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        """Generate CA, server certificates, and configure PKI directories.
+
+        Args:
+            data: Configuration data with domain name and directories
+
+        Returns:
+            OperationResult indicating success or failure
+        """
         self.notifications.info("Configuring certificates if needed")
         self.notifications.info("Reading SSL configuration template.")
         ssl_read_result = self.reader.read(

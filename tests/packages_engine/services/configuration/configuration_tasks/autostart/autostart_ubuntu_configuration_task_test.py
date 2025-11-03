@@ -1,3 +1,8 @@
+"""Tests for AutostartUbuntuConfigurationTask.
+
+Verifies systemd autostart service configuration on Ubuntu.
+"""
+
 import unittest
 
 from packages_engine.models import OperationResult
@@ -22,6 +27,11 @@ from packages_engine.services.package_controller.package_controller_service_mock
 
 
 class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
+    """Test suite for AutostartUbuntuConfigurationTask.
+
+    Tests autostart.service setup including template reading, file writing, and service enablement.
+    """
+
     reader: MockConfigurationContentReaderService
     file_system: MockFileSystemService
     notifications: MockNotificationsService
@@ -43,6 +53,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         self.maxDiff = None
 
     def test_happy_path(self):
+        """Verify successful autostart configuration."""
         # Act
         result = self.task.configure(self.data)
 
@@ -50,6 +61,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, OperationResult[bool].succeed(True))
 
     def test_happy_path_results_in_correct_notifications(self):
+        """Verify correct notification sequence on success."""
         # Act
         self.task.configure(self.data)
 
@@ -72,6 +84,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_reads_autostart_config_template_using_correct_parameters(self):
+        """Verify service template read with correct path."""
         # Act
         self.task.configure(self.data)
 
@@ -88,6 +101,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_autostart_config_template_read_failure_results_in_task_failure(self):
+        """Verify task fails when template read fails."""
         # Arrange
         fail_result = OperationResult[str].fail("Failure")
         self.reader.read_result = fail_result
@@ -99,6 +113,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_autostart_config_template_read_failure_results_in_correct_notifications_flow(self):
+        """Verify notifications on template read failure."""
         # Arrange
         fail_result = OperationResult[str].fail("Failure")
         self.reader.read_result = fail_result
@@ -121,6 +136,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_autostart_config_is_saved_in_the_system(self):
+        """Verify service file written to systemd directory."""
         # Act
         self.task.configure(self.data)
 
@@ -131,6 +147,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_autostart_config_save_failure_results_in_task_failure(self):
+        """Verify task fails when service file write fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result = fail_result
@@ -142,6 +159,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_autostart_config_save_failure_results_in_correct_notifications_flow(self):
+        """Verify notifications on service file write failure."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result = fail_result
@@ -166,6 +184,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_commands_to_enable_autostart_service_are_run(self):
+        """Verify systemctl commands executed to enable service."""
         # Act
         self.task.configure(self.data)
 
@@ -191,6 +210,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_commands_to_enable_autostart_failure_results_in_task_failure(self):
+        """Verify task fails when service enable commands fail."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result = fail_result
@@ -202,6 +222,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_commands_to_enable_autostart_failure_results_in_correct_notifications_flow(self):
+        """Verify notifications on service enable failure."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result = fail_result
@@ -223,6 +244,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_command_to_configure_autostart_script_failure_results_in_failure_result(self):
+        """Verify task fails when autostart.pyz permission setup fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map[
@@ -236,6 +258,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_command_to_configure_autostart_service_failure_results_in_failure_result(self):
+        """Verify task fails when service file permission setup fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map[
@@ -249,6 +272,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_command_to_restart_daemon_failure_results_in_failure_result(self):
+        """Verify task fails when daemon-reload fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map["sudo systemctl daemon-reload"] = (
@@ -262,6 +286,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_command_to_configure_autostart_script_failure_results_in_correct_notifications(self):
+        """Verify notifications when autostart.pyz permission setup fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map[
@@ -285,6 +310,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_command_to_configure_autostart_service_failure_results_in_correct_notifications(self):
+        """Verify notifications when service file permission setup fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map[
@@ -311,6 +337,7 @@ class TestAutostartUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_command_to_restart_daemon_failure_results_in_correct_notifications(self):
+        """Verify notifications when daemon-reload fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map["sudo systemctl daemon-reload"] = (

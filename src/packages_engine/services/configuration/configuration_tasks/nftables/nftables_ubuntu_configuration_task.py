@@ -1,4 +1,4 @@
-"""Necessary imports."""
+"""Nftables firewall configuration task for Ubuntu systems."""
 
 from packages_engine.models import OperationResult
 from packages_engine.models.configuration import ConfigurationContent, ConfigurationData
@@ -12,7 +12,7 @@ from packages_engine.services.package_controller import PackageControllerService
 
 
 class NftablesUbuntuConfigurationTask(ConfigurationTask):
-    """Nftables Ubuntu Configuration Task Implementation."""
+    """Configures nftables firewall with host rules, sysctl settings, and iptables-nft backend."""
 
     def __init__(
         self,
@@ -21,12 +21,28 @@ class NftablesUbuntuConfigurationTask(ConfigurationTask):
         notifications: NotificationsServiceContract,
         controller: PackageControllerServiceContract,
     ):
+        """Initialize the nftables configuration task.
+
+        Args:
+            reader: Service for reading configuration templates
+            file_system: Service for file system operations
+            notifications: Service for user notifications
+            controller: Service for executing system commands
+        """
         self.reader = reader
         self.file_system = file_system
         self.notifications = notifications
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        """Configure nftables by setting up rules, enabling IP forwarding, and configuring iptables backend.
+
+        Args:
+            data: Configuration data containing server settings and template paths
+
+        Returns:
+            OperationResult[bool]: Success if nftables is configured and loaded, failure otherwise
+        """
         self.notifications.info("Reading Nftables Config template data.")
 
         # Read your rendered rules for the *host* table (from your template path)

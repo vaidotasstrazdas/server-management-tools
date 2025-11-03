@@ -1,3 +1,8 @@
+"""Ubuntu autostart service configuration.
+
+Sets up a systemd service that runs the autostart.pyz application on boot.
+"""
+
 from packages_engine.models import OperationResult
 from packages_engine.models.configuration import ConfigurationContent, ConfigurationData
 from packages_engine.services.configuration.configuration_content_reader import (
@@ -10,6 +15,12 @@ from packages_engine.services.package_controller import PackageControllerService
 
 
 class AutostartUbuntuConfigurationTask(ConfigurationTask):
+    """Configures autostart systemd service on Ubuntu.
+
+    Creates and enables a systemd unit that runs autostart.pyz at boot,
+    ensuring proper permissions and service activation.
+    """
+
     def __init__(
         self,
         reader: ConfigurationContentReaderServiceContract,
@@ -17,12 +28,31 @@ class AutostartUbuntuConfigurationTask(ConfigurationTask):
         notifications: NotificationsServiceContract,
         controller: PackageControllerServiceContract,
     ):
+        """Initialize the autostart configuration task.
+
+        Args:
+            reader: Service for reading configuration templates.
+            file_system: Service for file operations.
+            notifications: Service for user notifications.
+            controller: Service for executing system commands.
+        """
         self.reader = reader
         self.file_system = file_system
         self.notifications = notifications
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        """Configure and enable the autostart systemd service.
+
+        Verifies autostart.pyz exists, sets permissions, creates systemd unit
+        from template, and enables/starts the service.
+
+        Args:
+            data: Configuration data including server data directory path.
+
+        Returns:
+            OperationResult[bool]: Success if service is configured and running.
+        """
         self.notifications.info("Configuring autostart script")
 
         # Ensure zipapp is present and executable (self_deploy.pyz places it here)

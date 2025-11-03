@@ -1,3 +1,5 @@
+"""Configure systemd-resolved split DNS for WireGuard on Ubuntu."""
+
 from packages_engine.models import OperationResult
 from packages_engine.models.configuration import ConfigurationContent, ConfigurationData
 from packages_engine.services.configuration.configuration_content_reader import (
@@ -10,6 +12,7 @@ from packages_engine.services.package_controller import PackageControllerService
 
 
 class SystemdUbuntuConfigurationTask(ConfigurationTask):
+    """Configures systemd-resolved with WireGuard split DNS settings."""
     def __init__(
         self,
         reader: ConfigurationContentReaderServiceContract,
@@ -17,12 +20,28 @@ class SystemdUbuntuConfigurationTask(ConfigurationTask):
         notifications: NotificationsServiceContract,
         controller: PackageControllerServiceContract,
     ):
+        """Initialize the systemd configuration task.
+
+        Args:
+            reader: Service for reading configuration content
+            file_system: Service for file system operations
+            notifications: Service for user notifications
+            controller: Service for executing system commands
+        """
         self.reader = reader
         self.file_system = file_system
         self.notifications = notifications
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        """Configure systemd-resolved with split DNS for WireGuard.
+
+        Args:
+            data: Configuration data containing server settings
+
+        Returns:
+            OperationResult indicating success or failure
+        """
         self.notifications.info("Will configure systemd now.")
 
         self.notifications.info("Reading split DNS configuration.")

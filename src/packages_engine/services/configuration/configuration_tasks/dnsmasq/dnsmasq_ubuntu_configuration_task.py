@@ -1,3 +1,5 @@
+"""Dnsmasq DNS/DHCP server configuration task for Ubuntu systems."""
+
 from packages_engine.models import OperationResult
 from packages_engine.models.configuration import ConfigurationContent, ConfigurationData
 from packages_engine.services.configuration.configuration_content_reader import (
@@ -10,7 +12,7 @@ from packages_engine.services.package_controller import PackageControllerService
 
 
 class DnsmasqUbuntuConfigurationTask(ConfigurationTask):
-    """Dnsmasq configuration task."""
+    """Configures Dnsmasq DNS/DHCP service with template-based config and systemd integration."""
 
     def __init__(
         self,
@@ -19,12 +21,28 @@ class DnsmasqUbuntuConfigurationTask(ConfigurationTask):
         notifications: NotificationsServiceContract,
         controller: PackageControllerServiceContract,
     ):
+        """Initialize the Dnsmasq configuration task.
+
+        Args:
+            reader: Service for reading configuration templates
+            file_system: Service for file system operations
+            notifications: Service for user notifications
+            controller: Service for executing system commands
+        """
         self.reader = reader
         self.file_system = file_system
         self.notifications = notifications
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        """Configure Dnsmasq by reading template, writing config, validating, and starting service.
+
+        Args:
+            data: Configuration data containing server settings and template paths
+
+        Returns:
+            OperationResult[bool]: Success if Dnsmasq is configured and running, failure otherwise
+        """
         self.notifications.info("Reading Dnsmasq Config template data.")
         read_result = self.reader.read(
             ConfigurationContent.RAW_STRING,

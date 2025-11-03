@@ -1,3 +1,8 @@
+"""Tests for CertificatesUbuntuConfigurationTask.
+
+Verifies SSL/TLS certificate and CA generation on Ubuntu.
+"""
+
 import unittest
 
 from packages_engine.models import OperationResult
@@ -22,6 +27,11 @@ from packages_engine.services.package_controller.package_controller_service_mock
 
 
 class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
+    """Test suite for CertificatesUbuntuConfigurationTask.
+
+    Tests certificate generation, CA setup, and PKI folder configuration.
+    """
+
     reader: MockConfigurationContentReaderService
     file_system: MockFileSystemService
     notifications: MockNotificationsService
@@ -48,6 +58,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         self.maxDiff = None
 
     def test_happy_path(self):
+        """Verify successful certificate configuration."""
         # Act
         result = self.task.configure(self.data)
 
@@ -55,6 +66,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, OperationResult[bool].succeed(True))
 
     def test_happy_path_produces_correct_notifications_flow(self):
+        """Verify correct notification sequence during successful configuration."""
         # Act
         self.task.configure(self.data)
 
@@ -78,6 +90,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_reads_san_template(self):
+        """Verify SAN template is read from correct location."""
         # Act
         self.task.configure(self.data)
 
@@ -92,6 +105,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_read_san_template_results_in_failure(self):
+        """Verify task fails when SAN template cannot be read."""
         # Arrange
         failure_result = OperationResult[str].fail("Failure")
         self.reader.read_result = failure_result
@@ -103,6 +117,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_failure_to_read_san_template_results_in_failure_notifications_flow(self):
+        """Verify error notifications when SAN template read fails."""
         # Arrange
         failure_result = OperationResult[str].fail("Failure")
         self.reader.read_result = failure_result
@@ -121,6 +136,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_runs_correct_commands(self):
+        """Verify correct OpenSSL and install commands are executed."""
         # Act
         self.task.configure(self.data)
 
@@ -161,6 +177,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_pki_folders_ensurance_command_failure_results_in_failure(self):
+        """Verify task fails when PKI folder creation fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map[
@@ -174,6 +191,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_pki_folders_ensurance_command_failure_results_in_failure_notifications_flow(self):
+        """Verify error notifications when PKI folder creation fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map[
@@ -196,6 +214,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_keygen_command_failure_results_in_failure(self):
+        """Verify task fails when CA key generation fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map[
@@ -209,6 +228,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_keygen_command_failure_results_in_failure_notifications_flow(self):
+        """Verify error notifications when CA key generation fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map[
@@ -235,6 +255,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_keycert_command_failure_results_in_failure(self):
+        """Verify task fails when server certificate generation fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map["test -f /etc/ssl/internal-pki/.key"] = (
@@ -248,6 +269,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_keycert_command_failure_results_in_failure_notifications_flow(self):
+        """Verify error notifications when server certificate generation fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map["test -f /etc/ssl/internal-pki/.key"] = (
@@ -276,6 +298,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_stores_san_template(self):
+        """Verify SAN template is written to correct location."""
         # Act
         self.task.configure(self.data)
 
@@ -286,6 +309,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_store_san_template_results_in_failure(self):
+        """Verify task fails when SAN template cannot be written."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result_map = {
@@ -299,6 +323,7 @@ class TestCertificatesUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_failure_to_store_san_template_results_in_failure_notifications_flow(self):
+        """Verify error notifications when SAN template write fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result_map = {

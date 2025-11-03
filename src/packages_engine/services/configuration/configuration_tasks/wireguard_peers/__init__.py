@@ -1,3 +1,8 @@
+"""WireGuard peer configuration tasks.
+
+Configures WireGuard peer connections and keys.
+"""
+
 from .wireguard_peers_ubuntu_configuration_task import WireguardPeersUbuntuConfigurationTask
 from .wireguard_peers_windows_configuration_task import WireguardPeersWindowsConfigurationTask
 

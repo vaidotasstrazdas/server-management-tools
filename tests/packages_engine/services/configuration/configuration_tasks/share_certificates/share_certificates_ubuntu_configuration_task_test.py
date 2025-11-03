@@ -1,3 +1,7 @@
+"""Tests for ShareCertificatesUbuntuConfigurationTask.
+
+Verifies CA certificate sharing to client devices on Ubuntu.
+"""
 import unittest
 
 from packages_engine.models import OperationResult
@@ -21,6 +25,10 @@ from packages_engine.services.package_controller.package_controller_service_mock
 
 
 class TestShareCertificatesUbuntuConfigurationTask(unittest.TestCase):
+    """Test suite for ShareCertificatesUbuntuConfigurationTask.
+
+    Tests CA certificate reading and copying to client data directory.
+    """
     reader: MockConfigurationContentReaderService
     file_system: MockFileSystemService
     notifications: MockNotificationsService
@@ -50,6 +58,7 @@ class TestShareCertificatesUbuntuConfigurationTask(unittest.TestCase):
         self.maxDiff = None
 
     def test_happy_path(self):
+        """Verify successful certificate sharing."""
         # Act
         result = self.task.configure(self.data)
 
@@ -57,6 +66,7 @@ class TestShareCertificatesUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, OperationResult[bool].succeed(True))
 
     def test_happy_path_produces_correct_notifications_flow(self):
+        """Verify correct notification sequence during successful sharing."""
         # Act
         self.task.configure(self.data)
 
@@ -76,6 +86,7 @@ class TestShareCertificatesUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_reads_certificate_data(self):
+        """Verify CA certificate is read from correct path."""
         # Act
         self.task.configure(self.data)
 
@@ -83,6 +94,7 @@ class TestShareCertificatesUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(self.file_system.read_text_params, ["/etc/ssl/internal-pki/ca.crt"])
 
     def test_failure_to_read_certificates_data_results_in_failure(self):
+        """Verify task fails when CA certificate cannot be read."""
         # Arrange
         failure_result = OperationResult[str].fail("Failure")
         self.file_system.read_text_result_map = {"/etc/ssl/internal-pki/ca.crt": failure_result}
@@ -94,6 +106,7 @@ class TestShareCertificatesUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_failure_to_read_certificates_data_results_in_failure_notifications_flow(self):
+        """Verify error notifications when CA certificate read fails."""
         # Arrange
         failure_result = OperationResult[str].fail("Failure")
         self.file_system.read_text_result_map = {"/etc/ssl/internal-pki/ca.crt": failure_result}
@@ -112,6 +125,7 @@ class TestShareCertificatesUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_stores_certificate_data(self):
+        """Verify CA certificate is written to client data directory."""
         # Act
         self.task.configure(self.data)
 
@@ -122,6 +136,7 @@ class TestShareCertificatesUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_store_certificate_data_results_in_failure(self):
+        """Verify task fails when CA certificate cannot be written."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result_map = {"/dev/usb/certificate.crt": failure_result}
@@ -133,6 +148,7 @@ class TestShareCertificatesUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_failure_to_store_certificate_data_results_in_failure_notifications_flow(self):
+        """Verify error notifications when CA certificate write fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result_map = {"/dev/usb/certificate.crt": failure_result}

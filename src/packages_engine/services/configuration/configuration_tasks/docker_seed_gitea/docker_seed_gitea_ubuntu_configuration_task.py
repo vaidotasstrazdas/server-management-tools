@@ -1,3 +1,8 @@
+"""Ubuntu configuration task for seeding Gitea app.ini.
+
+Creates initial Gitea configuration file if it doesn't exist.
+"""
+
 from packages_engine.models import OperationResult
 from packages_engine.models.configuration import ConfigurationContent, ConfigurationData
 from packages_engine.services.configuration.configuration_content_reader import (
@@ -10,6 +15,12 @@ from packages_engine.services.package_controller import PackageControllerService
 
 
 class DockerSeedGiteaUbuntuConfigurationTask(ConfigurationTask):
+    """Seeds Gitea app.ini configuration on Ubuntu.
+
+    Creates Gitea's app.ini from template if not present, ensuring
+    proper directory structure and permissions.
+    """
+
     def __init__(
         self,
         reader: ConfigurationContentReaderServiceContract,
@@ -17,12 +28,31 @@ class DockerSeedGiteaUbuntuConfigurationTask(ConfigurationTask):
         notifications: NotificationsServiceContract,
         controller: PackageControllerServiceContract,
     ):
+        """Initialize the Gitea seeding task.
+
+        Args:
+            reader: Service for reading configuration templates.
+            file_system: Service for file operations.
+            notifications: Service for user notifications.
+            controller: Service for executing system commands.
+        """
         self.reader = reader
         self.file_system = file_system
         self.notifications = notifications
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        """Create Gitea app.ini configuration if missing.
+
+        Checks for existing config, reads template, creates directory structure,
+        writes config file, and sets proper ownership/permissions.
+
+        Args:
+            data: Configuration data including server data directory path.
+
+        Returns:
+            OperationResult[bool]: Success if config exists or was created.
+        """
         self.notifications.info("Seeding Gitea app.ini if missing.")
 
         gitea_ini_path = "/srv/gitea/config/app.ini"

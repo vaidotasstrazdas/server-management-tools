@@ -1,3 +1,5 @@
+"""Tests for DockerOrchestrationWindowsConfigurationTask. Validates Windows platform is unsupported."""
+
 import unittest
 
 from packages_engine.models import OperationResult
@@ -8,6 +10,8 @@ from packages_engine.services.configuration.configuration_tasks.docker_orchestra
 
 
 class TestDockerOrchestrationWindowsConfigurationTask(unittest.TestCase):
+    """Test suite for DockerOrchestrationWindowsConfigurationTask. Confirms Windows orchestration returns not supported error."""
+
     task: DockerOrchestrationWindowsConfigurationTask
     data: ConfigurationData
 
@@ -16,6 +20,7 @@ class TestDockerOrchestrationWindowsConfigurationTask(unittest.TestCase):
         self.data = ConfigurationData.default()
 
     def test_returns_unsupported_error(self):
+        """Verifies configuration returns not supported error on Windows."""
         # Act
         result = self.task.configure(self.data)
 

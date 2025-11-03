@@ -1,3 +1,8 @@
+"""Ubuntu Docker resources configuration.
+
+Creates directories and docker-compose configuration for Docker services.
+"""
+
 from packages_engine.models import OperationResult
 from packages_engine.models.configuration import ConfigurationContent, ConfigurationData
 from packages_engine.services.configuration.configuration_content_reader import (
@@ -10,6 +15,12 @@ from packages_engine.services.package_controller import PackageControllerService
 
 
 class DockerResourcesUbuntuConfigurationTask(ConfigurationTask):
+    """Sets up Docker directories and compose configuration on Ubuntu.
+
+    Creates service directories with proper permissions and deploys
+    docker-compose.yml configuration.
+    """
+
     def __init__(
         self,
         reader: ConfigurationContentReaderServiceContract,
@@ -17,12 +28,31 @@ class DockerResourcesUbuntuConfigurationTask(ConfigurationTask):
         notifications: NotificationsServiceContract,
         controller: PackageControllerServiceContract,
     ):
+        """Initialize Docker resources task.
+
+        Args:
+            reader: Service for reading configuration templates.
+            file_system: Service for file operations.
+            notifications: Service for user notifications.
+            controller: Service for executing system commands.
+        """
         self.reader = reader
         self.file_system = file_system
         self.notifications = notifications
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        """Create Docker directories and deploy compose configuration.
+
+        Creates directories for postgres, gitea, and pgadmin with proper
+        ownership, then writes docker-compose.yml from template.
+
+        Args:
+            data: Configuration data including server data directory path.
+
+        Returns:
+            OperationResult[bool]: Success if all resources are created.
+        """
         self.notifications.info("Creating Docker folders if they do not exist.")
         # ensure directories exist with correct perms/owners
         fix_dirs = self.controller.run_raw_commands(

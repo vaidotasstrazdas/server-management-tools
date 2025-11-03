@@ -1,3 +1,5 @@
+"""Tests for NginxUbuntuConfigurationTask. Verifies Nginx configuration deployment on Ubuntu."""
+
 import unittest
 
 from packages_engine.models import OperationResult
@@ -21,6 +23,7 @@ from packages_engine.services.package_controller.package_controller_service_mock
 
 
 class TestNginxUbuntuConfigurationTask(unittest.TestCase):
+    """Test suite for NginxUbuntuConfigurationTask. Tests configuration reading, writing, and service restart."""
     reader: MockConfigurationContentReaderService
     file_system: MockFileSystemService
     notifications: MockNotificationsService
@@ -57,6 +60,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         self.maxDiff = None
 
     def test_happy_path(self):
+        """Verifies successful Nginx configuration completes without errors."""
         # Act
         result = self.task.configure(self.data)
 
@@ -64,6 +68,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, OperationResult[bool].succeed(True))
 
     def test_happy_path_produces_correct_notifications_flow(self):
+        """Verifies correct notification sequence during successful configuration."""
         # Act
         self.task.configure(self.data)
 
@@ -154,6 +159,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_reads_nginx_configuration_templates(self):
+        """Verifies all required config templates are read from correct paths."""
         # Act
         self.task.configure(self.data)
 
@@ -180,6 +186,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_read_gitea_config_result_in_failure(self):
+        """Verifies failure when gitea config template cannot be read."""
         # Arrange
         failure_result = OperationResult[str].fail("Failure")
         self.reader.read_result_map["/usr/local/share/srv/data/nginx/sites-available/gitea.app"] = (
@@ -193,6 +200,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_failure_to_read_gitea_config_result_in_failure_notifications_flow(self):
+        """Verifies correct error notifications when gitea config read fails."""
         # Arrange
         failure_result = OperationResult[str].fail("Failure")
         self.reader.read_result_map["/usr/local/share/srv/data/nginx/sites-available/gitea.app"] = (
@@ -227,6 +235,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_read_postgresql_config_result_in_failure(self):
+        """Verifies failure when postgresql config template cannot be read."""
         # Arrange
         failure_result = OperationResult[str].fail("Failure")
         self.reader.read_result_map[
@@ -240,6 +249,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_failure_to_read_postgresql_config_result_in_failure_notifications_flow(self):
+        """Verifies correct error notifications when postgresql config read fails."""
         # Arrange
         failure_result = OperationResult[str].fail("Failure")
         self.reader.read_result_map[
@@ -275,6 +285,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_read_nginx_config_result_in_failure(self):
+        """Verifies failure when nginx.conf template cannot be read."""
         # Arrange
         failure_result = OperationResult[str].fail("Failure")
         self.reader.read_result_map["/usr/local/share/srv/data/nginx/nginx.conf"] = failure_result
@@ -286,6 +297,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_failure_to_read_nginx_config_result_in_failure_notifications_flow(self):
+        """Verifies correct error notifications when nginx.conf read fails."""
         # Arrange
         failure_result = OperationResult[str].fail("Failure")
         self.reader.read_result_map["/usr/local/share/srv/data/nginx/nginx.conf"] = failure_result
@@ -318,6 +330,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_store_gitea_config_result_in_failure(self):
+        """Verifies failure when gitea config file cannot be written."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result_map["/etc/nginx/sites-available/gitea.app"] = (
@@ -331,6 +344,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_failure_to_store_gitea_config_result_in_failure_notifications_flow(self):
+        """Verifies correct error notifications when gitea config write fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result_map["/etc/nginx/sites-available/gitea.app"] = (
@@ -375,6 +389,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_store_postgresql_config_result_in_failure(self):
+        """Verifies failure when postgresql config file cannot be written."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result_map["/etc/nginx/sites-available/postgresql.app"] = (
@@ -388,6 +403,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_failure_to_store_postgresql_config_result_in_failure_notifications_flow(self):
+        """Verifies correct error notifications when postgresql config write fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result_map["/etc/nginx/sites-available/postgresql.app"] = (
@@ -432,6 +448,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_store_nginx_config_result_in_failure(self):
+        """Verifies failure when nginx.conf file cannot be written."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result_map["/etc/nginx/nginx.conf"] = failure_result
@@ -443,6 +460,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_failure_to_store_nginx_config_result_in_failure_notifications_flow(self):
+        """Verifies correct error notifications when nginx.conf write fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result_map["/etc/nginx/nginx.conf"] = failure_result
@@ -477,6 +495,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_runs_configuration_commands(self):
+        """Verifies correct shell commands are executed for Nginx setup."""
         # Act
         self.task.configure(self.data)
 
@@ -496,6 +515,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_run_commands_results_in_failure(self):
+        """Verifies failure when configuration commands cannot be executed."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result = failure_result
@@ -507,6 +527,7 @@ class TestNginxUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_failure_to_run_commands_results_in_failure_notifications_flow(self):
+        """Verifies correct error notifications when command execution fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result = failure_result

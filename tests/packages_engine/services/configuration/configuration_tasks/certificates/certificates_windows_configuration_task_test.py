@@ -1,3 +1,8 @@
+"""Tests for CertificatesWindowsConfigurationTask.
+
+Verifies Windows platform returns unsupported status.
+"""
+
 import unittest
 
 from packages_engine.models import OperationResult
@@ -8,6 +13,11 @@ from packages_engine.services.configuration.configuration_tasks.certificates imp
 
 
 class TestCertificatesWindowsConfigurationTask(unittest.TestCase):
+    """Test suite for CertificatesWindowsConfigurationTask.
+
+    Tests that Windows implementation properly returns unsupported status.
+    """
+
     task: CertificatesWindowsConfigurationTask
     data: ConfigurationData
 
@@ -16,6 +26,7 @@ class TestCertificatesWindowsConfigurationTask(unittest.TestCase):
         self.data = ConfigurationData.default()
 
     def test_returns_unsupported_error(self):
+        """Verify task returns unsupported error on Windows."""
         # Act
         result = self.task.configure(self.data)
 

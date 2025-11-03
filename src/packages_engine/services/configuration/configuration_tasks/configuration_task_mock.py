@@ -1,13 +1,18 @@
-from packages_engine.models.configuration import ConfigurationData
+"""Configuration task for mocks in tests."""
+
 from packages_engine.models import OperationResult
+from packages_engine.models.configuration import ConfigurationData
 
 from .configuration_task import ConfigurationTask
 
+
 class MockConfigurationTask(ConfigurationTask):
+    """Implementation details of the configuration task mock."""
+
     def __init__(self):
         self.configure_params: list[ConfigurationData] = []
         self.configure_result = OperationResult[bool].succeed(True)
-        
+
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
         self.configure_params.append(data)
         return self.configure_result

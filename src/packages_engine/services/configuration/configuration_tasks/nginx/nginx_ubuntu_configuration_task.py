@@ -1,3 +1,5 @@
+"""Nginx web server configuration task for Ubuntu systems."""
+
 from typing import Any
 
 from packages_engine.models import OperationResult
@@ -12,6 +14,8 @@ from packages_engine.services.package_controller import PackageControllerService
 
 
 class NginxUbuntuConfigurationTask(ConfigurationTask):
+    """Configures Nginx by deploying site configs (gitea, postgresql) and main nginx.conf."""
+
     def __init__(
         self,
         reader: ConfigurationContentReaderServiceContract,
@@ -19,12 +23,28 @@ class NginxUbuntuConfigurationTask(ConfigurationTask):
         notifications: NotificationsServiceContract,
         controller: PackageControllerServiceContract,
     ):
+        """Initialize the Nginx configuration task.
+
+        Args:
+            reader: Service for reading configuration templates
+            file_system: Service for file system operations
+            notifications: Service for user notifications
+            controller: Service for executing system commands
+        """
         self.reader = reader
         self.file_system = file_system
         self.notifications = notifications
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        """Configure Nginx by writing config files, enabling sites, validating, and reloading.
+
+        Args:
+            data: Configuration data containing server settings and template paths
+
+        Returns:
+            OperationResult[bool]: Success if Nginx is configured and reloaded, failure otherwise
+        """
         self.notifications.info("Configuring Nginx.")
 
         self.notifications.info("Replacing Nginx configurations.")

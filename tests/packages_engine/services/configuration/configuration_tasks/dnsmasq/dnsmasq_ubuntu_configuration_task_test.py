@@ -1,3 +1,8 @@
+"""Tests for DnsmasqUbuntuConfigurationTask.
+
+Verifies dnsmasq DNS server configuration on Ubuntu.
+"""
+
 import unittest
 
 from packages_engine.models import OperationResult
@@ -22,6 +27,11 @@ from packages_engine.services.package_controller.package_controller_service_mock
 
 
 class TestDnsmasqUbuntuConfigurationTask(unittest.TestCase):
+    """Test suite for DnsmasqUbuntuConfigurationTask.
+
+    Tests dnsmasq.conf setup including template reading, validation, and service restart.
+    """
+
     reader: MockConfigurationContentReaderService
     file_system: MockFileSystemService
     notifications: MockNotificationsService
@@ -43,6 +53,7 @@ class TestDnsmasqUbuntuConfigurationTask(unittest.TestCase):
         self.maxDiff = None
 
     def test_happy_path(self):
+        """Verify successful dnsmasq configuration."""
         # Act
         result = self.task.configure(self.data)
 
@@ -50,6 +61,7 @@ class TestDnsmasqUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, OperationResult[bool].succeed(True))
 
     def test_happy_path_results_in_correct_notifications_flow(self):
+        """Verify correct notification sequence on success."""
         # Act
         self.task.configure(self.data)
 
@@ -79,6 +91,7 @@ class TestDnsmasqUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_reads_config_using_correct_parameters(self):
+        """Verify config template read with correct path."""
         # Act
         self.task.configure(self.data)
 
@@ -95,6 +108,7 @@ class TestDnsmasqUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_read_failure_results_in_task_failure(self):
+        """Verify task fails when template read fails."""
         # Arrange
         fail_result = OperationResult[str].fail("Failure")
         self.reader.read_result = fail_result
@@ -106,6 +120,7 @@ class TestDnsmasqUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_read_failure_results_in_correct_notifications_flow(self):
+        """Verify notifications on template read failure."""
         # Arrange
         fail_result = OperationResult[str].fail("Failure")
         self.reader.read_result = fail_result
@@ -123,6 +138,7 @@ class TestDnsmasqUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_writes_config_using_correct_parameters(self):
+        """Verify config written to /etc/dnsmasq.d/internal.conf."""
         # Act
         self.task.configure(self.data)
 
@@ -133,6 +149,7 @@ class TestDnsmasqUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_write_failure_result_in_task_failure(self):
+        """Verify task fails when config file write fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result = fail_result
@@ -144,6 +161,7 @@ class TestDnsmasqUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_write_failure_result_in_correct_notifications_flow(self):
+        """Verify notifications on config write failure."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.file_system.write_text_result = fail_result
@@ -169,6 +187,7 @@ class TestDnsmasqUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_runs_correct_commands(self):
+        """Verify dnsmasq test, enable, and restart commands executed."""
         # Act
         self.task.configure(self.data)
 
@@ -197,6 +216,7 @@ class TestDnsmasqUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_running_commands_failure_results_in_task_failure(self):
+        """Verify task fails when commands fail."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result = fail_result
@@ -208,6 +228,7 @@ class TestDnsmasqUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_running_commands_failure_results_in_correct_notifications_flow(self):
+        """Verify notifications on command execution failure."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result = fail_result

@@ -1,3 +1,5 @@
+"""WireGuard VPN configuration task for Ubuntu systems."""
+
 from packages_engine.models import OperationResult
 from packages_engine.models.configuration import ConfigurationContent, ConfigurationData
 from packages_engine.services.configuration.configuration_content_reader import (
@@ -10,6 +12,8 @@ from packages_engine.services.package_controller import PackageControllerService
 
 
 class WireguardUbuntuConfigurationTask(ConfigurationTask):
+    """Configures WireGuard VPN server by deploying wg0.conf and bringing up the interface."""
+
     def __init__(
         self,
         reader: ConfigurationContentReaderServiceContract,
@@ -17,12 +21,28 @@ class WireguardUbuntuConfigurationTask(ConfigurationTask):
         notifications: NotificationsServiceContract,
         controller: PackageControllerServiceContract,
     ):
+        """Initialize the WireGuard configuration task.
+
+        Args:
+            reader: Service for reading configuration templates
+            file_system: Service for file system operations
+            notifications: Service for user notifications
+            controller: Service for executing system commands
+        """
         self.reader = reader
         self.file_system = file_system
         self.notifications = notifications
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        """Configure WireGuard by reading server config, writing wg0.conf, and starting the interface.
+
+        Args:
+            data: Configuration data containing WireGuard server settings
+
+        Returns:
+            OperationResult[bool]: Success if WireGuard is configured and wg0 is up, failure otherwise
+        """
         self.notifications.info("Will Configure WireGuard now.")
         self.notifications.info("Reading WireGuard configuration.")
         server_config_result = self.reader.read(ConfigurationContent.WIREGUARD_SERVER_CONFIG, data)

@@ -1,3 +1,5 @@
+"""Tests for DockerOrchestrationUbuntuConfigurationTask. Validates Docker network, DNS, and compose orchestration on Ubuntu."""
+
 import unittest
 
 from packages_engine.models import OperationResult
@@ -20,6 +22,8 @@ from packages_engine.services.package_controller.package_controller_service_mock
 
 
 class TestDockerOrchestrationUbuntuConfigurationTask(unittest.TestCase):
+    """Test suite for DockerOrchestrationUbuntuConfigurationTask. Verifies network setup, DNS config, and container orchestration."""
+
     reader: MockConfigurationContentReaderService
     file_system: MockFileSystemService
     notifications: MockNotificationsService
@@ -40,6 +44,7 @@ class TestDockerOrchestrationUbuntuConfigurationTask(unittest.TestCase):
         self.maxDiff = None
 
     def test_happy_path(self):
+        """Verifies successful configuration returns success result."""
         # Act
         result = self.task.configure(self.data)
 
@@ -47,6 +52,7 @@ class TestDockerOrchestrationUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, OperationResult[bool].succeed(True))
 
     def test_happy_path_notifications_flow(self):
+        """Verifies correct notification messages are sent during successful orchestration."""
         # Act
         self.task.configure(self.data)
 
@@ -60,6 +66,7 @@ class TestDockerOrchestrationUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_runs_commands(self):
+        """Verifies all required Docker network, DNS, and compose commands are executed."""
         # Act
         self.task.configure(self.data)
 
@@ -113,6 +120,7 @@ class TestDockerOrchestrationUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_run_commands_results_in_failure(self):
+        """Verifies command execution failure propagates as failed result."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result = failure_result
@@ -124,6 +132,7 @@ class TestDockerOrchestrationUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, failure_result)
 
     def test_failure_to_run_commands_results_in_failure_notifications_flow(self):
+        """Verifies error notifications are sent when command execution fails."""
         # Arrange
         failure_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result = failure_result

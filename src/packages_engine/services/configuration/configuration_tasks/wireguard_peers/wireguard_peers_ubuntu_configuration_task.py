@@ -1,3 +1,5 @@
+"""Generate WireGuard peer configurations and keys on Ubuntu."""
+
 from packages_engine.models import OperationResult
 from packages_engine.models.configuration import ConfigurationData
 from packages_engine.services.configuration.configuration_content_reader import (
@@ -10,6 +12,8 @@ from packages_engine.services.package_controller import PackageControllerService
 
 
 class WireguardPeersUbuntuConfigurationTask(ConfigurationTask):
+    """Generates WireGuard keys and IP assignments for server and clients."""
+
     def __init__(
         self,
         reader: ConfigurationContentReaderServiceContract,
@@ -17,12 +21,28 @@ class WireguardPeersUbuntuConfigurationTask(ConfigurationTask):
         notifications: NotificationsServiceContract,
         controller: PackageControllerServiceContract,
     ):
+        """Initialize the WireGuard peers configuration task.
+
+        Args:
+            reader: Service for reading configuration content
+            file_system: Service for file system operations
+            notifications: Service for user notifications
+            controller: Service for executing system commands
+        """
         self.reader = reader
         self.file_system = file_system
         self.notifications = notifications
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        """Generate WireGuard private/public keys and IP addresses for all peers.
+
+        Args:
+            data: Configuration data with client names list
+
+        Returns:
+            OperationResult indicating success or failure
+        """
         self.notifications.info("Preparing WireGuard server, clients configuration and keys.")
 
         self.notifications.info(

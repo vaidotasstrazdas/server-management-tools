@@ -1,3 +1,7 @@
+"""Tests for WireguardPeersUbuntuConfigurationTask.
+
+Verifies WireGuard server and client key/IP generation on Ubuntu.
+"""
 import unittest
 
 from packages_engine.models import OperationResult
@@ -20,6 +24,10 @@ from packages_engine.services.package_controller.package_controller_service_mock
 
 
 class TestWireguardPeersUbuntuConfigurationTask(unittest.TestCase):
+    """Test suite for WireguardPeersUbuntuConfigurationTask.
+
+    Tests WireGuard key pair generation and IP assignment for server and clients.
+    """
     reader: MockConfigurationContentReaderService
     file_system: MockFileSystemService
     notifications: MockNotificationsService
@@ -59,6 +67,7 @@ class TestWireguardPeersUbuntuConfigurationTask(unittest.TestCase):
         self.maxDiff = None
 
     def test_happy_path(self):
+        """Verify successful WireGuard peer configuration."""
         # Act
         result = self.task.configure(self.data)
 
@@ -66,6 +75,7 @@ class TestWireguardPeersUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, OperationResult[bool].succeed(True))
 
     def test_happy_path_has_correct_notifications_flow(self):
+        """Verify correct notification sequence during successful configuration."""
         # Act
         self.task.configure(self.data)
 
@@ -131,6 +141,7 @@ class TestWireguardPeersUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_configures_permissions(self):
+        """Verify WireGuard directories are created with correct permissions."""
         # Act
         self.task.configure(self.data)
 
@@ -141,6 +152,7 @@ class TestWireguardPeersUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_produces_correct_notifications_flow_on_faiure_to_configure_permissions(self):
+        """Verify error notifications when directory permission setup fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map[
@@ -171,6 +183,7 @@ class TestWireguardPeersUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_produces_failure_result_on_failure_to_configure_permissions(self):
+        """Verify task fails when directory permission setup fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Failure")
         self.controller.run_raw_commands_result_regex_map[
@@ -184,111 +197,147 @@ class TestWireguardPeersUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_generates_configuration_for_server(self):
+        """Verify server key pair is generated correctly."""
         self._configurations_generation_test("server")
 
     def test_generates_configuration_for_clients_case_1(self):
+        """Verify first client key pair is generated correctly."""
         self._configurations_generation_test("clients/client_one")
 
     def test_generates_configuration_for_clients_case_2(self):
+        """Verify second client key pair is generated correctly."""
         self._configurations_generation_test("clients/client_two")
 
     def test_protects_ip_path_for_server(self):
+        """Verify server IP file permissions are set correctly."""
         self._ip_path_protection_test("server")
 
     def test_protects_ip_path_for_clients_case_1(self):
+        """Verify first client IP file permissions are set correctly."""
         self._ip_path_protection_test("clients/client_one")
 
     def test_protects_ip_path_for_clients_case_2(self):
+        """Verify second client IP file permissions are set correctly."""
         self._ip_path_protection_test("clients/client_two")
 
     def test_stores_correct_server_ip(self):
+        """Verify server IP is written correctly."""
         self._ip_store_test("server.ip", "10.10.0.1")
 
     def test_stores_correct_ip_for_clients_case_1(self):
+        """Verify first client IP is written correctly."""
         self._ip_store_test("clients/client_one.ip", "10.10.0.2")
 
     def test_stores_correct_ip_for_clients_case_2(self):
+        """Verify second client IP is written correctly."""
         self._ip_store_test("clients/client_two.ip", "10.10.0.3")
 
     def test_does_not_generate_configuration_for_server_when_paths_exist(self):
+        """Verify server keys are not regenerated when they exist."""
         self._configurations_not_generation_test("server")
 
     def test_does_not_generate_configuration_for_clients_case_1_when_paths_exist(self):
+        """Verify first client keys are not regenerated when they exist."""
         self._configurations_not_generation_test("clients/client_one")
 
     def test_does_not_generate_configuration_for_clients_case_2_when_paths_exist(self):
+        """Verify second client keys are not regenerated when they exist."""
         self._configurations_not_generation_test("clients/client_two")
 
     def test_does_not_protect_ip_path_for_server_when_paths_exist(self):
+        """Verify server IP permissions not set when file exists."""
         self._ip_path_not_protection_test("server")
 
     def test_does_not_protect_ip_path_for_clients_case_1_when_paths_exist(self):
+        """Verify first client IP permissions not set when file exists."""
         self._ip_path_not_protection_test("clients/client_one")
 
     def test_does_not_protect_ip_path_for_clients_case_2_when_paths_exist(self):
+        """Verify second client IP permissions not set when file exists."""
         self._ip_path_not_protection_test("clients/client_two")
 
     def test_does_not_store_server_ip_when_paths_exist(self):
+        """Verify server IP not written when file exists."""
         self._ip_not_store_test("server")
 
     def test_does_not_store_ip_for_clients_case_1_when_paths_exist(self):
+        """Verify first client IP not written when file exists."""
         self._ip_not_store_test("clients/client_one")
 
     def test_does_not_store_ip_for_clients_case_2_when_paths_exist(self):
+        """Verify second client IP not written when file exists."""
         self._ip_not_store_test("clients/client_two")
 
     def test_failure_on_generate_configuration_for_server(self):
+        """Verify task fails when server key generation fails."""
         self._configurations_generation_fail_test("server")
 
     def test_failure_on_generate_configuration_for_clients_case_1(self):
+        """Verify task fails when first client key generation fails."""
         self._configurations_generation_fail_test("clients/client_one")
 
     def test_failure_on_generate_configuration_for_clients_case_2(self):
+        """Verify task fails when second client key generation fails."""
         self._configurations_generation_fail_test("clients/client_two")
 
     def test_failure_on_protect_ip_path_for_server(self):
+        """Verify task fails when server IP chmod fails."""
         self._ip_protection_failure_test("server")
 
     def test_failure_on_protect_ip_path_for_clients_case_1(self):
+        """Verify task fails when first client IP chmod fails."""
         self._ip_protection_failure_test("clients/client_one")
 
     def test_failure_on_protect_ip_path_for_clients_case_2(self):
+        """Verify task fails when second client IP chmod fails."""
         self._ip_protection_failure_test("clients/client_two")
 
     def test_failure_on_store_server_ip(self):
+        """Verify task fails when server IP write fails."""
         self._ip_store_failure_test("server")
 
     def test_failure_on_store_ip_for_clients_case_1(self):
+        """Verify task fails when first client IP write fails."""
         self._ip_store_failure_test("clients/client_one")
 
     def test_failure_on_store_ip_for_clients_case_2(self):
+        """Verify task fails when second client IP write fails."""
         self._ip_store_failure_test("clients/client_two")
 
     def test_failure_on_generate_configuration_for_server_notifications(self):
+        """Verify error notifications when server key generation fails."""
         self._configurations_generation_fail_notifications_test("server")
 
     def test_failure_on_generate_configuration_for_clients_case_1_notifications(self):
+        """Verify error notifications when first client key generation fails."""
         self._configurations_generation_fail_notifications_test("clients/client_one")
 
     def test_failure_on_generate_configuration_for_clients_case_2_notifications(self):
+        """Verify error notifications when second client key generation fails."""
         self._configurations_generation_fail_notifications_test("clients/client_two")
 
     def test_failure_on_protect_ip_path_for_server_notifications(self):
+        """Verify error notifications when server IP chmod fails."""
         self._ip_protection_failure_notifications_test("server")
 
     def test_failure_on_protect_ip_path_for_clients_case_1_notifications(self):
+        """Verify error notifications when first client IP chmod fails."""
         self._ip_protection_failure_notifications_test("clients/client_one")
 
     def test_failure_on_protect_ip_path_for_clients_case_2_notifications(self):
+        """Verify error notifications when second client IP chmod fails."""
         self._ip_protection_failure_notifications_test("clients/client_two")
 
     def test_failure_on_store_server_ip_notifications(self):
+        """Verify error notifications when server IP write fails."""
         self._ip_store_failure_notifications_test("server")
 
     def test_failure_on_store_ip_for_clients_case_1_notifications(self):
+        """Verify error notifications when first client IP write fails."""
         self._ip_store_failure_notifications_test("clients/client_one")
 
     def test_failure_on_store_ip_for_clients_case_2_notifications(self):
+        """Verify error notifications when second client IP write fails."""
         self._ip_store_failure_notifications_test("clients/client_two")
 
     def _configurations_generation_test(self, expected_config_entity: str):

@@ -1,3 +1,8 @@
+"""Tests for WireguardShareUbuntuConfigurationTask.
+
+Verifies WireGuard client configuration sharing on Ubuntu.
+"""
+
 import unittest
 
 from packages_engine.models import OperationResult
@@ -22,6 +27,11 @@ from packages_engine.services.package_controller.package_controller_service_mock
 
 
 class TestWireguardShareUbuntuConfigurationTask(unittest.TestCase):
+    """Test suite for WireguardShareUbuntuConfigurationTask.
+
+    Tests WireGuard client configuration generation and sharing.
+    """
+
     reader: MockConfigurationContentReaderService
     file_system: MockFileSystemService
     notifications: MockNotificationsService
@@ -49,6 +59,7 @@ class TestWireguardShareUbuntuConfigurationTask(unittest.TestCase):
         self.maxDiff = None
 
     def test_happy_path(self):
+        """Verify successful WireGuard configuration sharing."""
         # Act
         result = self.task.configure(self.data)
 
@@ -56,6 +67,7 @@ class TestWireguardShareUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, OperationResult[bool].succeed(True))
 
     def test_happy_path_produces_correct_notifications_flow(self):
+        """Verify correct notification sequence during successful sharing."""
         # Act
         self.task.configure(self.data)
 
@@ -72,6 +84,7 @@ class TestWireguardShareUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_reads_correct_wireguard_configurations(self):
+        """Verify WireGuard client configuration is read correctly."""
         # Act
         self.task.configure(self.data)
 
@@ -84,6 +97,7 @@ class TestWireguardShareUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_read_wireguard_clients_configuration_results_in_failure(self):
+        """Verify task fails when configuration read fails."""
         # Arrange
         fail_result = OperationResult[str].fail("wireguard-clients-config-read-failure")
         self.reader.read_result = fail_result
@@ -95,6 +109,7 @@ class TestWireguardShareUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_failure_to_read_wireguard_clients_configuration_results_in_correct_notifications(self):
+        """Verify error notifications when configuration read fails."""
         # Arrange
         fail_result = OperationResult[str].fail("wireguard-server-config-read-failure")
         self.reader.read_result = fail_result
@@ -113,6 +128,7 @@ class TestWireguardShareUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_failure_to_save_wireguard_clients_config_results_in_failure(self):
+        """Verify task fails when configuration write fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Massive fail")
         self.file_system.write_text_result_map = {
@@ -126,6 +142,7 @@ class TestWireguardShareUbuntuConfigurationTask(unittest.TestCase):
         self.assertEqual(result, fail_result)
 
     def test_failure_to_save_wireguard_clients_config_results_in_correct_notifications(self):
+        """Verify error notifications when configuration write fails."""
         # Arrange
         fail_result = OperationResult[bool].fail("Massive fail")
         self.file_system.write_text_result_map = {
@@ -148,6 +165,7 @@ class TestWireguardShareUbuntuConfigurationTask(unittest.TestCase):
         )
 
     def test_stores_clients_config_correctly(self):
+        """Verify client configuration is written to correct location."""
         # Act
         self.task.configure(self.data)
 

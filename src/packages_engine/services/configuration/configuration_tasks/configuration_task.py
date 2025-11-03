@@ -1,4 +1,7 @@
-"""Imports for the configuration task interface."""
+"""Base interface for configuration tasks.
+
+Defines the abstract contract for all system configuration tasks.
+"""
 
 from abc import ABC, abstractmethod
 
@@ -7,8 +10,19 @@ from packages_engine.models.configuration import ConfigurationData
 
 
 class ConfigurationTask(ABC):
-    """Contract for the interface"""
+    """Abstract base class for system configuration tasks.
+
+    All configuration tasks must implement the configure method to apply
+    system configurations based on provided data.
+    """
 
     @abstractmethod
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
-        """Method that each class implementing this interface must implement."""
+        """Apply configuration to the system.
+
+        Args:
+            data: Configuration data containing settings to apply.
+
+        Returns:
+            OperationResult[bool]: Success if configured, failure otherwise.
+        """

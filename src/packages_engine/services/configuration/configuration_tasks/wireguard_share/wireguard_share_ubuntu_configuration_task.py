@@ -1,3 +1,5 @@
+"""Share WireGuard client configurations on Ubuntu."""
+
 from packages_engine.models import OperationResult
 from packages_engine.models.configuration import ConfigurationContent, ConfigurationData
 from packages_engine.services.configuration.configuration_content_reader import (
@@ -10,6 +12,8 @@ from packages_engine.services.package_controller import PackageControllerService
 
 
 class WireguardShareUbuntuConfigurationTask(ConfigurationTask):
+    """Writes WireGuard client configuration to client data directory."""
+
     def __init__(
         self,
         reader: ConfigurationContentReaderServiceContract,
@@ -17,12 +21,28 @@ class WireguardShareUbuntuConfigurationTask(ConfigurationTask):
         notifications: NotificationsServiceContract,
         controller: PackageControllerServiceContract,
     ):
+        """Initialize the WireGuard share configuration task.
+
+        Args:
+            reader: Service for reading configuration content
+            file_system: Service for file system operations
+            notifications: Service for user notifications
+            controller: Service for executing system commands
+        """
         self.reader = reader
         self.file_system = file_system
         self.notifications = notifications
         self.controller = controller
 
     def configure(self, data: ConfigurationData) -> OperationResult[bool]:
+        """Generate and save WireGuard client configuration file.
+
+        Args:
+            data: Configuration data with client directory path
+
+        Returns:
+            OperationResult indicating success or failure
+        """
         self.notifications.info("Sharing WireGuard configuration for the clients.")
 
         self.notifications.info("Reading WireGuard shared configuration.")
